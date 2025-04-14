@@ -1,0 +1,19 @@
+connect:
+  host: "127.0.0.1"
+  port: 3306
+  database: "test_store"
+  user: "root"
+  password: "123456"
+
+tables:
+  admin:
+    name: "admin"
+    fields:
+      nameLength: 50
+      accountLength: 50
+      passwordLength: 500
+
+  userSession:
+    name: "user_session"
+    fields:
+      sessionIdLength: 80

@@ -1,0 +1,39 @@
+{
+  "type": "module",
+  "name": "server",
+  "version": "0.0.0",
+  "description": "后端服务",
+  "main": "./src/index.ts",
+  "scripts": {
+    "start": "tsx ./src/index.ts",
+    "dev": "cross-env NODE_ENV=development tsx watch ./src/index.ts",
+    "debug": "cross-env NODE_ENV=development tsx watch --inspect ./src/index.ts",
+    "build": "uxiu-cli build",
+    "key": "tsx ./scripts/key.ts",
+    "init:root": "tsx ./scripts/initRoot.ts"
+  },
+  "dependencies": {
+    "@koa/bodyparser": "^5.1.1",
+    "@koa/cors": "^5.0.0",
+    "ali-oss": "^6.22.0",
+    "bcrypt": "^5.1.1",
+    "koa": "^2.15.4",
+    "koa-router": "^13.0.1",
+    "koa-static": "^5.0.0",
+    "log4js": "^6.9.1",
+    "mysql2": "^3.12.0",
+    "nanoid": "^5.0.9",
+    "path-to-regexp": "^8.2.0",
+    "xss": "^1.0.15"
+  },
+  "devDependencies": {
+    "@types/ali-oss": "^6.16.11",
+    "@types/bcrypt": "^5.0.2",
+    "@types/koa": "^2.15.0",
+    "@types/koa-router": "^7.4.8",
+    "@types/koa-static": "^4.0.4",
+    "@types/koa__cors": "^5.0.0",
+    "cross-env": "^7.0.3",
+    "uxiu-cli": "^0.6.3"
+  }
+}

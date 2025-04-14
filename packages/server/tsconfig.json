@@ -1,0 +1,60 @@
+{
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "noEmitOnError": false,
+        "target": "ESNext",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "outDir": "./dist",
+        "baseUrl": ".",
+        "paths": {
+            "@root/*": [
+                "./*"
+            ],
+            "@/*": [
+                "./src/*"
+            ],
+            "#utils": [
+                "./src/utils/index.js"
+            ],
+            "@conf/*": [
+                "./src/conf/*"
+            ],
+            "#conf": [
+                "./src/conf/index.js"
+            ],
+            "#db": [
+                "./src/db/index.js"
+            ],
+            "#dbConnect": [
+                "./src/db/connect/index.js"
+            ],
+            "#common": [
+                "./src/common/index.js"
+            ],
+            "#middleware": [
+                "./src/middleware/index.js"
+            ],
+            "#router": [
+                "./src/router/index.js"
+            ]
+        },
+    },
+    "include": [
+        "./src/**/*",
+        "./scripts/**/*",
+        "./sysConf/**/*",
+        "./uxiu-cli.config.ts"
+    ],
+    "lib": [
+        "esnext",
+        "NodeNext"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}
