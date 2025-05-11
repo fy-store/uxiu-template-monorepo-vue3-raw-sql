@@ -17,16 +17,16 @@
     "node": "^18.0.0 || ^20.0.0 || >=22.0.0"
   },
   "repository": {
-		"type": "git",
-		"url": "git+https://github.com/fy-store/uxiu-template-monorepo-vue3-raw-sql.git"
-	},
+    "type": "git",
+    "url": "git+https://github.com/fy-store/uxiu-template-monorepo-vue3-raw-sql.git"
+  },
   "dependencies": {
     "axios": "^1.8.1",
     "core-js": "^3.41.0",
     "dayjs": "^1.11.13",
     "js-yaml": "^4.1.0",
     "picocolors": "^1.1.1",
-    "uxiu": "^0.9.0"
+    "uxiu": "^0.10.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
@@ -39,6 +39,7 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "bcrypt",
+      "core-js",
       "esbuild",
       "vue-demi"
     ]
