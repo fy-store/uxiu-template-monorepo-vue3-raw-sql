@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "uxiu-template-monorepo-vue3-raw-sql",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "monorepo + vue3 + koa + raw sql",
   "scripts": {
     "build": "pnpm -r build && tsx ./scripts/moveDist.ts",
