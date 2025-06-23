@@ -6,7 +6,7 @@ import { hash } from '#common'
 import { idsToConfig, authorityConfig } from '#conf'
 import { convertProps, createCheck, extract, Inspector } from 'uxiu'
 
-$.router.post('/updateAdmin/:id', async (ctx) => {
+sys.router.post('/updateAdmin/:id', async (ctx) => {
 	const checkIdInfo = checkId(ctx.params)
 	if (!checkIdInfo.result) {
 		ctx.body = {
@@ -51,7 +51,7 @@ $.router.post('/updateAdmin/:id', async (ctx) => {
 			return Inspector.rulesToSerialize(
 				Inspector.create(
 					idsToConfig([...new Set(originAuthority.concat(addAuthority).filter((id) => !removeAuthority.includes(id)))]),
-					{ base: $.sysConf.project.apiPath }
+					{ base: sys.conf.project.apiPath }
 				)
 			)
 		})(),

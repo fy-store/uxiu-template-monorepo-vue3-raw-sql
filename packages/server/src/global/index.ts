@@ -6,5 +6,5 @@ import Router from 'koa-router'
 import { logger } from '@/common/index.js'
 
 const router = new Router()
-globalThis.$.router = router
-globalThis.$.logger = logger
+globalThis.sys.router = router
+globalThis.sys.logger = logger

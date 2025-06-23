@@ -2,7 +2,7 @@ import path from 'path/posix'
 import log4js from 'log4js'
 
 const rootPath = process.cwd()
-const storePath = path.join(rootPath, $.sysConf.project.common.logger.storagePath)
+const storePath = path.join(rootPath, sys.conf.project.common.logger.storagePath)
 
 const config: log4js.Configuration = {
 	pm2: true,

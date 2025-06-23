@@ -6,7 +6,7 @@ import { hash } from '#common'
 import { admin } from '#db'
 import { authorityConfig } from '#conf'
 
-$.router.post('/createAdmin', async (ctx) => {
+sys.router.post('/createAdmin', async (ctx) => {
 	const checkInfo = check(ctx.request.body)
 	if (!checkInfo.result) {
 		ctx.body = {
@@ -132,5 +132,5 @@ function filterAuthority(authority: string[], userSession: UserSession) {
 		if (item) list.push(item)
 	})
 
-	return Inspector.rulesToSerialize(Inspector.create<Meta>(list, { base: $.sysConf.project.apiPath }))
+	return Inspector.rulesToSerialize(Inspector.create<Meta>(list, { base: sys.conf.project.apiPath }))
 }

@@ -7,7 +7,7 @@ import getTempToken from './getTempToken.js'
  * @param options 获取临时凭证的配置选项
  */
 export default async (options?: AliOSSCreateOptions) => {
-	const { aliOSS } = $.sysConf.project.common
+	const { aliOSS } = sys.conf.project.common
 	const token = await getTempToken(options)
 	return new OSS({
 		region: aliOSS.client.region,

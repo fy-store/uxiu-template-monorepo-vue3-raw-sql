@@ -26,7 +26,7 @@
     "dayjs": "^1.11.13",
     "js-yaml": "^4.1.0",
     "picocolors": "^1.1.1",
-    "uxiu": "^0.10.0"
+    "uxiu": "^0.12.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",

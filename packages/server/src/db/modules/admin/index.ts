@@ -2,7 +2,7 @@ import type { Admin, AllInfoAdmin, QueryAdmin, QueryAdminCount, CreateAdmin, Upd
 import { execute } from '#dbConnect'
 import { ifel } from '#utils'
 
-const { admin } = $.sysConf.mysql.tables
+const { admin } = sys.conf.mysql.tables
 
 export function getList(params: QueryAdmin): Promise<[Admin[], any]>
 export function getList(params: QueryAdmin, allInfo: boolean): Promise<[AllInfoAdmin[], any]>

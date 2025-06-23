@@ -1,6 +1,6 @@
 import type { IsSuperSelect } from '../../types/index.js'
 
-$.router.get('/getIsSuperSelect', async (ctx) => {
+sys.router.get('/getIsSuperSelect', async (ctx) => {
 	ctx.body = {
 		code: 0,
 		msg: '登录成功',

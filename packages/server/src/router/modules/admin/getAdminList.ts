@@ -2,7 +2,7 @@ import type { QueryAdmin } from '../../types/index.js'
 import { convertProps, createCheck } from 'uxiu'
 import { admin } from '#db'
 
-$.router.get('/getAdminList', async (ctx) => {
+sys.router.get('/getAdminList', async (ctx) => {
 	const checkInfo = check(ctx.query)
 	if (!checkInfo.result) {
 		ctx.body = {

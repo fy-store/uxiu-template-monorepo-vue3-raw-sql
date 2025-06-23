@@ -1,6 +1,6 @@
 import { admin } from '#db'
 
-$.router.get('/getMyInfo', async (ctx) => {
+sys.router.get('/getMyInfo', async (ctx) => {
 	const { id } = ctx.userSession
 
 	const [[info]] = await admin.getById(id, true)

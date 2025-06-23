@@ -10,7 +10,7 @@ import { preventInjection, userSession, verifyAuthority, visitLog, reqLog } from
 import { Context } from 'koa'
 
 createApp({
-	port: $.sysConf.project.port,
+	port: sys.conf.project.port,
 	koaOptions: {
 		proxy: true
 	},

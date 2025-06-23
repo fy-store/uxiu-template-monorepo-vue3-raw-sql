@@ -4,7 +4,7 @@ import { isNumber } from 'uxiu'
 import { logger } from '#common'
 import color from 'picocolors'
 
-const { host, port, database, user, password } = $.sysConf.mysql.connect
+const { host, port, database, user, password } = sys.conf.mysql.connect
 await init()
 
 // 创建连接池

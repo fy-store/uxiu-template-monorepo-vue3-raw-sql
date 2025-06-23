@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise'
 
 export default async () => {
-	const { host, user, port, password, database } = $.sysConf.mysql.connect
+	const { host, user, port, password, database } = sys.conf.mysql.connect
 	const connection = await mysql.createConnection({
 		host,
 		user,

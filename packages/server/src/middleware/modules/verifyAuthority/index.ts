@@ -12,7 +12,7 @@ export const verifyAuthority = () => {
 				path: 'login'
 			}
 		],
-		{ base: $.sysConf.project.apiPath }
+		{ base: sys.conf.project.apiPath }
 	)
 
 	const allowRules = Inspector.create(
@@ -22,7 +22,7 @@ export const verifyAuthority = () => {
 				path: 'getMyInfo'
 			}
 		],
-		{ base: $.sysConf.project.apiPath }
+		{ base: sys.conf.project.apiPath }
 	)
 
 	return async (ctx: Context, next: Next) => {
@@ -61,7 +61,7 @@ export const verifyAuthority = () => {
 
 		const userSession = await ctx.userSessionStore.get<UserSession>(sessionId)
 		const now = Date.now()
-		if (now - userSession.latelyOperationTimer > $.sysConf.project.loginVerify.expireInterval) {
+		if (now - userSession.latelyOperationTimer > sys.conf.project.loginVerify.expireInterval) {
 			ctx.body = {
 				code: -1,
 				msg: '长时间未操作, 请重新登录'

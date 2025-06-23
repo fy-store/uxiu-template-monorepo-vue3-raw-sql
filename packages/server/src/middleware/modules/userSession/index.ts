@@ -47,7 +47,7 @@ everydayTask(
 	async () => {
 		const now = Date.now()
 		sessionStore.each(async (id, value: any) => {
-			if (now - value.latelyOperationTimer > $.sysConf.project.loginVerify.expireInterval) {
+			if (now - value.latelyOperationTimer > sys.conf.project.loginVerify.expireInterval) {
 				await sessionStore.del(id)
 			}
 		})

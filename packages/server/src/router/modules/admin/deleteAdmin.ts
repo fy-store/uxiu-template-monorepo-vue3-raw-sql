@@ -1,7 +1,7 @@
 import { convertProps, createCheck } from 'uxiu'
 import { admin } from '#db'
 
-$.router.post('/deleteAdmin/:id', async (ctx) => {
+sys.router.post('/deleteAdmin/:id', async (ctx) => {
 	const checkInfo = check(ctx.params)
 	if (!checkInfo.result) {
 		ctx.body = {

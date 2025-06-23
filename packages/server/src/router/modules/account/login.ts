@@ -4,7 +4,7 @@ import { sleep, createCheck, random } from 'uxiu'
 import { hash, encipher } from '#common'
 import { admin } from '#db'
 
-$.router.post('/login', async (ctx) => {
+sys.router.post('/login', async (ctx) => {
 	const checkInfo = check(ctx.request.body)
 	if (!checkInfo.result) {
 		ctx.body = {
@@ -49,7 +49,7 @@ $.router.post('/login', async (ctx) => {
 	})
 
 	// 当当前用户会话超过最大数量时，删除最久未操作的会话
-	if (currentUserSessions.length >= $.sysConf.project.loginVerify.maxSession) {
+	if (currentUserSessions.length >= sys.conf.project.loginVerify.maxSession) {
 		let mostLongTimeNotOperate: [string, UserSession['sessionValue']] = currentUserSessions[0]
 		for (let i = 1; i < currentUserSessions.length; i++) {
 			const [id, value] = currentUserSessions[i]

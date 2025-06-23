@@ -1,5 +1,5 @@
-const { name } = $.sysConf.mysql.tables.admin
-const { nameLength, passwordLength, accountLength } = $.sysConf.mysql.tables.admin.fields
+const { name } = sys.conf.mysql.tables.admin
+const { nameLength, passwordLength, accountLength } = sys.conf.mysql.tables.admin.fields
 
 export default /*sql*/ `
 create table if not exists ${name} (

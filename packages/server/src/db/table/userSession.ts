@@ -1,5 +1,5 @@
-const { name } = $.sysConf.mysql.tables.userSession
-const { sessionIdLength } = $.sysConf.mysql.tables.userSession.fields
+const { name } = sys.conf.mysql.tables.userSession
+const { sessionIdLength } = sys.conf.mysql.tables.userSession.fields
 
 export default /*sql*/ `
 create table if not exists ${name} (

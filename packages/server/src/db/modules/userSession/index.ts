@@ -1,7 +1,7 @@
 import { execute } from '#dbConnect'
 import { QueryUserSession, UserSession } from '#db'
 
-const { userSession } = $.sysConf.mysql.tables
+const { userSession } = sys.conf.mysql.tables
 export const getList = (params?: QueryUserSession): Promise<[UserSession[], any]> => {
 	if (!params) {
 		const sql = /*sql*/ `

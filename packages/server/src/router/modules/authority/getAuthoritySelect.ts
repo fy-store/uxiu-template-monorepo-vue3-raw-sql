@@ -6,7 +6,7 @@ import type { ReadonlyAuthorityTree } from '#conf'
  * 超管返回所有权限
  * 其他管理员仅返回其自身拥有的权限
  */
-$.router.get('/getAuthoritySelect', async (ctx) => {
+sys.router.get('/getAuthoritySelect', async (ctx) => {
 	if (ctx.userSession.isSuper) {
 		ctx.body = {
 			code: 0,
