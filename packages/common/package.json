@@ -1,0 +1,16 @@
+{
+  "type": "module",
+  "name": "common",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.2.0"
+  }
+}
