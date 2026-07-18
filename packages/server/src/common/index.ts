@@ -1,4 +1,3 @@
-export * from './aliOSS'
 export * from './symmetryEncipher'
 export * from './asymmetricEncipher'
 export * from './hash'

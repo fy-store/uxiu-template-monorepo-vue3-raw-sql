@@ -39,12 +39,12 @@ export const defaultSysConfigSchema = z.object({
 			publicKey: z.string(),
 			/** 私钥 PEM 格式 */
 			privateKey: z.string()
+		}),
+		/** 日志 */
+		logger: z.object({
+			/** 存储路径 */
+			storagePath: z.string()
 		})
-	}),
-	/** 日志 */
-	logger: z.object({
-		/** 存储路径 */
-		storagePath: z.string()
 	}),
 	/** mysql 数据库 */
 	mysql: z.object({
