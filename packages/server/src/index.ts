@@ -23,7 +23,7 @@ createApp({
 	port: sys.config.port,
 	env: process.env.NODE_ENV,
 	loggerOptions: {
-		storageDirPath: path.join(process.cwd(), sys.config.logger.storagePath),
+		storageDirPath: path.join(process.cwd(), sys.config.common.logger.storagePath),
 		categories: { db: true }
 	},
 	koaOptions: {

@@ -46,6 +46,12 @@ export * from './schema'
 export class MySQLUtil extends DbFit {
 	/** 连接池 */
 	private _pool: mysql2.Pool
+	/** 连接池配置 */
+	private _poolOptions: mysql2.PoolOptions
+	/** 已确认存在的数据库 */
+	private _ensuredDatabaseNames = new Set<string>()
+	/** 正在执行的数据库确认任务 */
+	private _ensureDatabaseTasks = new Map<string, Promise<void>>()
 	/** 实例ID */
 	private _exampleId: string = `${crypto.randomUUID()}-${Date.now()}`
 	/**
@@ -142,6 +148,7 @@ export class MySQLUtil extends DbFit {
 				throw new Error('MySQLUtil -> call getConnection() must wait it done')
 			}
 			if (this._connection) return
+			await this.ensureConfiguredDatabase()
 			this._connection = await this._pool.getConnection()
 			// 开启事务
 			await this._connection.beginTransaction()
@@ -158,6 +165,7 @@ export class MySQLUtil extends DbFit {
 			await this._pool.end()
 		})
 
+		this._poolOptions = options.poolOptions
 		// 创建连接池
 		this._pool = mysql2.createPool({ charset: 'utf8mb4', ...options.poolOptions })
 	}
@@ -171,6 +179,7 @@ export class MySQLUtil extends DbFit {
 		if (this.isFirst) {
 			throw new Error('MySQLUtil -> call getConnection() must be called before the first query')
 		}
+		await this.ensureConfiguredDatabase()
 		this._connection = await this._pool.getConnection()
 		await this._connection.beginTransaction()
 		this._isConnectDone = true
@@ -181,6 +190,44 @@ export class MySQLUtil extends DbFit {
 	 */
 	getDatabaseList(): Promise<DefineTableQueryUtilResult<DataBaseListItem[]>> {
 		return this.query<DefineTableQueryUtilResult<DataBaseListItem[]>>('SHOW DATABASES')
+	}
+
+	/**
+	 * 确保数据库存在
+	 * - 使用不指定数据库的独立连接执行创建, 避免连接池配置的数据库不存在时无法建立连接
+	 * @param databaseName 数据库名称, a-z_0-9, 并且以字母开头
+	 */
+	async ensureDatabase(databaseName: string): Promise<void> {
+		if (!MySQLUtil.checkName(databaseName)) {
+			throw new Error(MySQLUtil.getCheckNameErrorMessage('databaseName'))
+		}
+		if (this._ensuredDatabaseNames.has(databaseName)) return
+
+		const pendingTask = this._ensureDatabaseTasks.get(databaseName)
+		if (pendingTask) return pendingTask
+
+		const task = (async () => {
+			const { database: _database, ...connectionOptions } = this._poolOptions
+			const connection = await mysql2.createConnection(connectionOptions)
+
+			try {
+				await connection.execute(/*sql*/ `
+					CREATE DATABASE IF NOT EXISTS \`${databaseName}\`
+					DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
+				`)
+				this._ensuredDatabaseNames.add(databaseName)
+			} finally {
+				await connection.end()
+			}
+		})()
+
+		this._ensureDatabaseTasks.set(databaseName, task)
+
+		try {
+			await task
+		} finally {
+			this._ensureDatabaseTasks.delete(databaseName)
+		}
 	}
 
 	/**
@@ -436,25 +483,31 @@ export class MySQLUtil extends DbFit {
 	 * 创建一个数据库
 	 * @param databaseName 数据库名称, a-z_0-9, 并且以字母开头
 	 */
-	createDatabase(databaseName: string): Promise<DefineTableQueryUtilResult<CreateDatabaseResult>> {
+	async createDatabase(databaseName: string): Promise<DefineTableQueryUtilResult<CreateDatabaseResult>> {
 		if (!MySQLUtil.checkName(databaseName)) {
 			throw new Error(MySQLUtil.getCheckNameErrorMessage('databaseName'))
 		}
-		return this.query<DefineTableQueryUtilResult<CreateDatabaseResult>>(/*sql*/ `
+		const result = await this.query<DefineTableQueryUtilResult<CreateDatabaseResult>>(/*sql*/ `
 				CREATE DATABASE IF NOT EXISTS \`${databaseName}\` 
 				DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
 			`)
+		this._ensuredDatabaseNames.add(databaseName)
+		return result
 	}
 
 	/**
 	 * 删除一个数据库
 	 * @param databaseName 数据库名称, a-z_0-9, 并且以字母开头
 	 */
-	deleteDatabase(databaseName: string): Promise<DefineTableQueryUtilResult<DeleteDatabaseResult>> {
+	async deleteDatabase(databaseName: string): Promise<DefineTableQueryUtilResult<DeleteDatabaseResult>> {
 		if (!MySQLUtil.checkName(databaseName)) {
 			throw new Error(MySQLUtil.getCheckNameErrorMessage('databaseName'))
 		}
-		return this.query<DefineTableQueryUtilResult<DeleteDatabaseResult>>(`DROP DATABASE IF EXISTS \`${databaseName}\``)
+		const result = await this.query<DefineTableQueryUtilResult<DeleteDatabaseResult>>(
+			`DROP DATABASE IF EXISTS \`${databaseName}\``
+		)
+		this._ensuredDatabaseNames.delete(databaseName)
+		return result
 	}
 
 	/**
@@ -523,7 +576,7 @@ export class MySQLUtil extends DbFit {
 	}
 
 	/**
-	 * 定义一个表, 如果表不存在则创建, 如果表存在则更新表结构以匹配定义
+	 * 定义一个表, 如果数据库或表不存在则创建, 如果表存在则更新表结构以匹配定义
 	 * @param options 配置列表
 	 * @param op 附加配置
 	 */
@@ -534,6 +587,7 @@ export class MySQLUtil extends DbFit {
 		if (!parseResult.success) {
 			throw parseResult.error
 		}
+		await this.ensureDatabase(options.databaseName)
 
 		const logs: DefineTableLog[] = []
 		let result = [
@@ -1401,6 +1455,15 @@ export class MySQLUtil extends DbFit {
 			currentIndex: MySQLUtil.getColumnIndex(currentInfo),
 			nextIndex: MySQLUtil.hasOwn(updateItem, 'index') ? updateItem.index : void 0,
 			column: columnSchema.parse(nextColumn)
+		}
+	}
+
+	/** 确保连接池配置中指定的数据库存在 */
+	private async ensureConfiguredDatabase() {
+		const databaseName = this._poolOptions.database
+
+		if (typeof databaseName === 'string' && databaseName.length > 0) {
+			await this.ensureDatabase(databaseName)
 		}
 	}
 

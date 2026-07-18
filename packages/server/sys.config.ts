@@ -11,9 +11,6 @@ export default definedSysConfig({
 		maxSession: 5
 	},
 	cookieKeys: ['rzTdakuI'],
-	logger: {
-		storagePath: './logs'
-	},
 	mysql: {
 		connect: {
 			host: '127.0.0.1',
@@ -24,6 +21,9 @@ export default definedSysConfig({
 		}
 	},
 	common: {
+		logger: {
+			storagePath: './logs'
+		},
 		hash: {
 			salt: 10
 		},
