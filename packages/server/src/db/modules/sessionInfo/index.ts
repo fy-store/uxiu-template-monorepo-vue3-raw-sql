@@ -33,8 +33,8 @@ export class DbSessionInfo extends DbFit {
 			'void',
 			/*sql*/ `
 				UPDATE ${sessionInfo.tableName} SET
-				${this.ifNotVoid(value, 'value = :value,')}
-				update_time = :updateTime
+					${this.ifNotVoid(value, 'value = :value,')}
+					update_time = :updateTime
 				WHERE id = :id AND delete_time IS NULL
 			`,
 			{ id, value: value, updateTime: new Date() }
@@ -59,8 +59,7 @@ export class DbSessionInfo extends DbFit {
 			/*sql*/ `
 				SELECT id, value 
 				FROM ${sessionInfo.tableName} 
-				WHERE delete_time IS NULL
-				${this.ifel(p && p.page && p.size, 'LIMIT :page, :size')}
+				WHERE delete_time IS NULL ${this.ifel(p && p.page && p.size, 'LIMIT :page, :size')}
 			`,
 			{
 				page: p && p.page && p.size ? (p.page - 1) * p.size : void 0,

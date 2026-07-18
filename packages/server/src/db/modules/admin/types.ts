@@ -6,7 +6,6 @@ export interface Admin {
 	account: string
 	authority: Permission
 	createTime: string
-	maxFileAuthorizeSign: number
 }
 
 export type AdminAll = Admin & {
@@ -32,7 +31,6 @@ export interface CreateAdminParams {
 	account: string
 	password: string
 	isSuper: boolean
-	maxFileAuthorizeSign: number
 	authority: Permission
 	remark: string
 }
@@ -43,6 +41,5 @@ export interface UpdateAdminParams {
 	password?: string
 	isSuper?: boolean
 	authority?: Permission
-	maxFileAuthorizeSign?: number
 	remark?: string
 }

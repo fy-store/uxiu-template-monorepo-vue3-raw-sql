@@ -1,1 +1,5 @@
 import 'core-js/actual/object/group-by'
+import 'core-js/actual/typed-array/from-base64'
+import 'core-js/actual/typed-array/from-hex'
+import 'core-js/actual/typed-array/to-base64'
+import 'core-js/actual/typed-array/to-hex'

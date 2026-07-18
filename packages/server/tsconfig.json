@@ -3,50 +3,28 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "noEmitOnError": false,
+        "strict": true,
         "target": "ESNext",
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
+        "module": "esnext",
+        "moduleResolution": "bundler",
         "skipLibCheck": true,
+        // "noEmit": true,
+        // "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": true,
         "forceConsistentCasingInFileNames": true,
-        "outDir": "./dist",
-        "baseUrl": ".",
         "paths": {
-            "@root/*": [
-                "./*"
-            ],
-            "@/*": [
+            "@server/*": [
                 "./src/*"
             ],
-            "#utils": [
-                "./src/utils/index.js"
-            ],
-            "@conf/*": [
-                "./src/conf/*"
-            ],
-            "#conf": [
-                "./src/conf/index.js"
-            ],
-            "#db": [
-                "./src/db/index.js"
-            ],
-            "#dbConnect": [
-                "./src/db/connect/index.js"
-            ],
-            "#common": [
-                "./src/common/index.js"
-            ],
-            "#middleware": [
-                "./src/middleware/index.js"
-            ],
-            "#router": [
-                "./src/router/index.js"
+            "@common/*": [
+                "../common/src/*"
             ]
-        },
+        }
     },
     "include": [
         "./src/**/*",
         "./scripts/**/*",
-        "./sysConf/**/*",
+        "./sys.config.ts",
         "./uxiu-cli.config.ts"
     ],
     "lib": [

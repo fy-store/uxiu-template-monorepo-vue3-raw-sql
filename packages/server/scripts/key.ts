@@ -1,14 +1,23 @@
-import color from 'picocolors'
-import { random } from 'uxiu'
+import { SymmetryEncipher } from '@common/symmetryEncipher'
+import { styleText } from 'node:util'
 
-const strArr = [...random.AZ, ...random.az, ...random.num]
+const divider = '='.repeat(72)
+const symmetryKey = SymmetryEncipher.generateKey()
+function printBlock(title: string, desc?: string) {
+	console.log(`\n${styleText('cyan', divider)}`)
+	console.log(styleText('bold', styleText('cyan', `[key] ${title}`)))
+	if (desc) {
+		console.log(styleText('dim', desc))
+	}
+	console.log(`${styleText('cyan', divider)}\n`)
+}
 
-const key8 = random.randomStr(8, strArr)
-const key16 = random.randomStr(16, strArr)
-const key32 = random.randomStr(32, strArr)
-const key64 = random.randomStr(64, strArr)
+function printKey(label: string, value: string) {
+	console.log(styleText('green', `${label}: ${value}`))
+}
 
-console.log(color.green(`8位: ${key8}`), '\n')
-console.log(color.green(`16位: ${key16}`), '\n')
-console.log(color.green(`32位: ${key32}`), '\n')
-console.log(color.green(`64位: ${key64}`), '\n')
+console.clear()
+printBlock('对称密钥生成完成', '已生成可用于对称加解密的密钥')
+printKey('向量 (IV)', symmetryKey.iv)
+printKey('密钥 (Key)', symmetryKey.key)
+console.log()
