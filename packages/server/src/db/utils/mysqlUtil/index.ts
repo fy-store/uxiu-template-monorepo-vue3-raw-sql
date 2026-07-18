@@ -1,4 +1,5 @@
-import type { Bus, DbFitEvents, DbFitOptions } from 'uxiu'
+import type { DbFitEvents, DbFitOptions } from 'uxiu'
+import { Bus, type InterfaceToType } from 'event-imt'
 import {
 	checkNameSchema,
 	columnSchema,
@@ -85,7 +86,7 @@ export class MySQLUtil extends DbFit {
 		return this._isConnectDone
 	}
 
-	get bus(): Bus<DbFitEvents<this> & MySQLUtilDbFitEvents> {
+	get bus(): Bus<InterfaceToType<DbFitEvents<this> & MySQLUtilDbFitEvents>> {
 		return super.bus
 	}
 
@@ -107,6 +108,7 @@ export class MySQLUtil extends DbFit {
 				let isError = false
 				let error: any = null
 				try {
+					// @ts-ignore
 					const originResult = await this._connection![options?.queryMode ?? 'execute'](newSql, newParams)
 					const result = originResult
 					return result
@@ -282,16 +284,42 @@ export class MySQLUtil extends DbFit {
 					} else if (normalizedIndex.type === 'unique') {
 						if (normalizedIndex.generated && normalizedIndex.generated.expression) {
 							const genName = normalizedIndex.name || `${column.name}_gen`
-							alterSql.push(MySQLUtil.buildGeneratedColumnDefinition(genName, column, normalizedIndex.generated.expression, 'add', normalizedIndex.generated.stored))
-							alterSql.push(MySQLUtil.buildAddIndexSql(MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)), genName))
+							alterSql.push(
+								MySQLUtil.buildGeneratedColumnDefinition(
+									genName,
+									column,
+									normalizedIndex.generated.expression,
+									'add',
+									normalizedIndex.generated.stored
+								)
+							)
+							alterSql.push(
+								MySQLUtil.buildAddIndexSql(
+									MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)),
+									genName
+								)
+							)
 						} else {
 							uniqueKeys.push(column.name)
 						}
 					} else if (normalizedIndex.type === 'index') {
 						if (normalizedIndex.generated && normalizedIndex.generated.expression) {
 							const genName = normalizedIndex.name || `${column.name}_gen`
-							alterSql.push(MySQLUtil.buildGeneratedColumnDefinition(genName, column, normalizedIndex.generated.expression, 'add', normalizedIndex.generated.stored))
-							alterSql.push(MySQLUtil.buildAddIndexSql(MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)), genName))
+							alterSql.push(
+								MySQLUtil.buildGeneratedColumnDefinition(
+									genName,
+									column,
+									normalizedIndex.generated.expression,
+									'add',
+									normalizedIndex.generated.stored
+								)
+							)
+							alterSql.push(
+								MySQLUtil.buildAddIndexSql(
+									MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)),
+									genName
+								)
+							)
 						} else {
 							indexKeys.push(column.name)
 						}
@@ -359,8 +387,11 @@ export class MySQLUtil extends DbFit {
 
 			alterSql.push(MySQLUtil.buildColumnDefinitionSql(normalizedColumn.column, 'change', normalizedColumn.targetName))
 
-			const currentNorm = normalizedColumn.currentIndex ? MySQLUtil.normalizeIndex(normalizedColumn.currentIndex) : void 0
-			const nextNorm = normalizedColumn.nextIndex !== undefined ? MySQLUtil.normalizeIndex(normalizedColumn.nextIndex) : void 0
+			const currentNorm = normalizedColumn.currentIndex
+				? MySQLUtil.normalizeIndex(normalizedColumn.currentIndex)
+				: void 0
+			const nextNorm =
+				normalizedColumn.nextIndex !== undefined ? MySQLUtil.normalizeIndex(normalizedColumn.nextIndex) : void 0
 
 			if (nextNorm !== undefined && (nextNorm.type ?? null) !== (currentNorm?.type ?? null)) {
 				if (currentNorm) {
@@ -370,10 +401,28 @@ export class MySQLUtil extends DbFit {
 				// 如果新增索引使用生成列，先创建生成列再创建索引
 				if (nextNorm && (nextNorm as any).generated && (nextNorm as any).generated.expression) {
 					const genName = (nextNorm as any).name || `${normalizedColumn.column.name}_gen`
-					alterSql.push(MySQLUtil.buildGeneratedColumnDefinition(genName, normalizedColumn.column, (nextNorm as any).generated.expression, 'add', (nextNorm as any).generated.stored))
-					alterSql.push(MySQLUtil.buildAddIndexSql(MySQLUtil.ensureIndexPrefix(nextNorm as any, MySQLUtil.getColumnOptionLength(normalizedColumn.column)), genName))
+					alterSql.push(
+						MySQLUtil.buildGeneratedColumnDefinition(
+							genName,
+							normalizedColumn.column,
+							(nextNorm as any).generated.expression,
+							'add',
+							(nextNorm as any).generated.stored
+						)
+					)
+					alterSql.push(
+						MySQLUtil.buildAddIndexSql(
+							MySQLUtil.ensureIndexPrefix(nextNorm as any, MySQLUtil.getColumnOptionLength(normalizedColumn.column)),
+							genName
+						)
+					)
 				} else {
-					alterSql.push(MySQLUtil.buildAddIndexSql(MySQLUtil.ensureIndexPrefix(nextNorm as any, MySQLUtil.getColumnOptionLength(normalizedColumn.column)), normalizedColumn.column.name))
+					alterSql.push(
+						MySQLUtil.buildAddIndexSql(
+							MySQLUtil.ensureIndexPrefix(nextNorm as any, MySQLUtil.getColumnOptionLength(normalizedColumn.column)),
+							normalizedColumn.column.name
+						)
+					)
 				}
 			}
 		}
@@ -563,7 +612,7 @@ export class MySQLUtil extends DbFit {
 			if (!currentInfo) {
 				const addParts = [MySQLUtil.buildColumnDefinitionSql(column, 'add')]
 				const columnIndex = MySQLUtil.getColumnOptionIndex(column)
-				const normalizedIndex = columnIndex ? MySQLUtil.normalizeIndex(columnIndex) as any : void 0
+				const normalizedIndex = columnIndex ? (MySQLUtil.normalizeIndex(columnIndex) as any) : void 0
 
 				if (normalizedIndex) {
 					// 如果索引配置包含 generated 表达式, 先创建生成列再创建索引
@@ -571,11 +620,29 @@ export class MySQLUtil extends DbFit {
 						const genName = normalizedIndex.name || `${column.name}_gen`
 						// 生成列可能已存在(如上一轮 defineTable 已创建), 避免重复创建
 						if (!columnMap.has(genName)) {
-							addParts.push(MySQLUtil.buildGeneratedColumnDefinition(genName, column, normalizedIndex.generated.expression, 'add', normalizedIndex.generated.stored))
-							addParts.push(MySQLUtil.buildAddIndexSql(MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)), genName))
+							addParts.push(
+								MySQLUtil.buildGeneratedColumnDefinition(
+									genName,
+									column,
+									normalizedIndex.generated.expression,
+									'add',
+									normalizedIndex.generated.stored
+								)
+							)
+							addParts.push(
+								MySQLUtil.buildAddIndexSql(
+									MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)),
+									genName
+								)
+							)
 						}
 					} else {
-						addParts.push(MySQLUtil.buildAddIndexSql(MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)), column.name))
+						addParts.push(
+							MySQLUtil.buildAddIndexSql(
+								MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)),
+								column.name
+							)
+						)
 					}
 				}
 
@@ -603,7 +670,7 @@ export class MySQLUtil extends DbFit {
 			const currentIndex = MySQLUtil.getColumnIndex(currentInfo)
 			const nextIndex = MySQLUtil.getColumnOptionIndex(column)
 			const currentNorm = currentIndex ? MySQLUtil.normalizeIndex(currentIndex) : void 0
-			const nextNorm = nextIndex ? MySQLUtil.normalizeIndex(nextIndex) as any : void 0
+			const nextNorm = nextIndex ? (MySQLUtil.normalizeIndex(nextIndex) as any) : void 0
 
 			if ((currentNorm?.type ?? null) !== (nextNorm?.type ?? null)) {
 				if (currentNorm) {
@@ -616,11 +683,29 @@ export class MySQLUtil extends DbFit {
 						const genName = nextNorm.name || `${column.name}_gen`
 						// 生成列+索引可能已存在(如上一轮 defineTable 已创建), 避免重复创建
 						if (!columnMap.has(genName)) {
-							columnSqlList.push(MySQLUtil.buildGeneratedColumnDefinition(genName, column, nextNorm.generated.expression, 'add', nextNorm.generated.stored))
-							columnSqlList.push(MySQLUtil.buildAddIndexSql(MySQLUtil.ensureIndexPrefix(nextNorm, MySQLUtil.getColumnOptionLength(column)), genName))
+							columnSqlList.push(
+								MySQLUtil.buildGeneratedColumnDefinition(
+									genName,
+									column,
+									nextNorm.generated.expression,
+									'add',
+									nextNorm.generated.stored
+								)
+							)
+							columnSqlList.push(
+								MySQLUtil.buildAddIndexSql(
+									MySQLUtil.ensureIndexPrefix(nextNorm, MySQLUtil.getColumnOptionLength(column)),
+									genName
+								)
+							)
 						}
 					} else {
-						columnSqlList.push(MySQLUtil.buildAddIndexSql(MySQLUtil.ensureIndexPrefix(nextNorm, MySQLUtil.getColumnOptionLength(column)), column.name))
+						columnSqlList.push(
+							MySQLUtil.buildAddIndexSql(
+								MySQLUtil.ensureIndexPrefix(nextNorm, MySQLUtil.getColumnOptionLength(column)),
+								column.name
+							)
+						)
 					}
 				}
 			}
@@ -681,7 +766,9 @@ export class MySQLUtil extends DbFit {
 	 * 标准化索引配置为统一格式
 	 * @param index 原始索引配置
 	 */
-	private static normalizeIndex(index: unknown): { type: 'primaryKey' | 'unique' | 'index'; prefix?: number } | undefined {
+	private static normalizeIndex(
+		index: unknown
+	): { type: 'primaryKey' | 'unique' | 'index'; prefix?: number } | undefined {
 		if (!index) {
 			return void 0
 		}
@@ -698,7 +785,12 @@ export class MySQLUtil extends DbFit {
 				prefix: idx.prefix,
 				name: idx.name,
 				generated: idx.generated
-			} as unknown as { type: 'primaryKey' | 'unique' | 'index'; prefix?: number; name?: string; generated?: { expression: string; stored?: boolean } }
+			} as unknown as {
+				type: 'primaryKey' | 'unique' | 'index'
+				prefix?: number
+				name?: string
+				generated?: { expression: string; stored?: boolean }
+			}
 		}
 
 		return void 0
@@ -709,7 +801,10 @@ export class MySQLUtil extends DbFit {
 	 * @param index 索引配置
 	 * @param columnName 列名称
 	 */
-	private static buildIndexName(index: { type: 'primaryKey' | 'unique' | 'index'; prefix?: number; name?: string }, columnName: string) {
+	private static buildIndexName(
+		index: { type: 'primaryKey' | 'unique' | 'index'; prefix?: number; name?: string },
+		columnName: string
+	) {
 		if (index.name && typeof index.name === 'string' && index.name.length > 0) {
 			return index.name
 		}
@@ -721,7 +816,10 @@ export class MySQLUtil extends DbFit {
 	 * @param index 索引对象（会返回一个新的对象副本）
 	 * @param columnLength 列字符长度（chars）
 	 */
-	private static ensureIndexPrefix(index: { type: string; prefix?: number; name?: string; generated?: any }, columnLength?: number) {
+	private static ensureIndexPrefix(
+		index: { type: string; prefix?: number; name?: string; generated?: any },
+		columnLength?: number
+	) {
 		const copy: any = { ...index }
 		if (copy.prefix === undefined && typeof columnLength === 'number') {
 			// utf8mb4 最多 4 bytes/char, 单列 key 最大 3072 bytes
@@ -738,13 +836,21 @@ export class MySQLUtil extends DbFit {
 	 * @param index 索引配置
 	 * @param columnName 列名称
 	 */
-	private static buildAddIndexSql(index: { type: 'primaryKey' | 'unique' | 'index'; prefix?: number; name?: string; generated?: { expression: string; stored?: boolean } }, columnName: string) {
+	private static buildAddIndexSql(
+		index: {
+			type: 'primaryKey' | 'unique' | 'index'
+			prefix?: number
+			name?: string
+			generated?: { expression: string; stored?: boolean }
+		},
+		columnName: string
+	) {
 		if (index.type === 'primaryKey') {
 			return `ADD PRIMARY KEY (\`${columnName}\`)`
 		}
 
 		// If index uses a generated column, the actual index column name is index.name if provided
-		const indexColumn = index.generated ? (index.name || columnName) : columnName
+		const indexColumn = index.generated ? index.name || columnName : columnName
 		const indexName = MySQLUtil.buildIndexName(index, indexColumn)
 		const prefixStr = index.prefix !== undefined ? `(${index.prefix})` : ''
 
@@ -760,7 +866,10 @@ export class MySQLUtil extends DbFit {
 	 * @param index 索引配置
 	 * @param columnName 列名称
 	 */
-	private static buildDropIndexSql(index: { type: 'primaryKey' | 'unique' | 'index'; prefix?: number }, columnName: string) {
+	private static buildDropIndexSql(
+		index: { type: 'primaryKey' | 'unique' | 'index'; prefix?: number },
+		columnName: string
+	) {
 		if (index.type === 'primaryKey') {
 			return 'DROP PRIMARY KEY'
 		}
@@ -773,56 +882,90 @@ export class MySQLUtil extends DbFit {
 	 * @param options 建表配置
 	 */
 	private static buildCreateTableSql(options: CreateTableOptions) {
-			const columnsSql: string[] = []
-			const primaryKeys: string[] = []
-			const uniqueKeys: { columnName: string; prefix?: number; generated?: boolean; name?: string }[] = []
-			const indexKeys: { columnName: string; prefix?: number; generated?: boolean; name?: string }[] = []
+		const columnsSql: string[] = []
+		const primaryKeys: string[] = []
+		const uniqueKeys: { columnName: string; prefix?: number; generated?: boolean; name?: string }[] = []
+		const indexKeys: { columnName: string; prefix?: number; generated?: boolean; name?: string }[] = []
 
-			for (const column of options.columns) {
-				columnsSql.push(MySQLUtil.buildColumnDefinitionSql(column, 'create'))
+		for (const column of options.columns) {
+			columnsSql.push(MySQLUtil.buildColumnDefinitionSql(column, 'create'))
 
-				if ('index' in column && column.index) {
-					const normalizedIndex = MySQLUtil.normalizeIndex(column.index) as any
+			if ('index' in column && column.index) {
+				const normalizedIndex = MySQLUtil.normalizeIndex(column.index) as any
 
-					if (normalizedIndex) {
-						if (normalizedIndex.type === 'primaryKey') {
-							primaryKeys.push(column.name)
-						} else if (normalizedIndex.type === 'unique') {
-							if (normalizedIndex.generated && normalizedIndex.generated.expression) {
-								const genName = normalizedIndex.name || `${column.name}_gen`
-								columnsSql.push(MySQLUtil.buildGeneratedColumnDefinition(genName, column, normalizedIndex.generated.expression, 'create', normalizedIndex.generated.stored))
-								uniqueKeys.push({ columnName: genName, prefix: MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)).prefix, generated: true, name: normalizedIndex.name })
-							} else {
-								uniqueKeys.push({ columnName: column.name, prefix: MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)).prefix, name: normalizedIndex.name })
-							}
-						} else if (normalizedIndex.type === 'index') {
-							if (normalizedIndex.generated && normalizedIndex.generated.expression) {
-								const genName = normalizedIndex.name || `${column.name}_gen`
-								columnsSql.push(MySQLUtil.buildGeneratedColumnDefinition(genName, column, normalizedIndex.generated.expression, 'create', normalizedIndex.generated.stored))
-								indexKeys.push({ columnName: genName, prefix: MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)).prefix, generated: true, name: normalizedIndex.name })
-							} else {
-								indexKeys.push({ columnName: column.name, prefix: MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)).prefix, name: normalizedIndex.name })
-							}
+				if (normalizedIndex) {
+					if (normalizedIndex.type === 'primaryKey') {
+						primaryKeys.push(column.name)
+					} else if (normalizedIndex.type === 'unique') {
+						if (normalizedIndex.generated && normalizedIndex.generated.expression) {
+							const genName = normalizedIndex.name || `${column.name}_gen`
+							columnsSql.push(
+								MySQLUtil.buildGeneratedColumnDefinition(
+									genName,
+									column,
+									normalizedIndex.generated.expression,
+									'create',
+									normalizedIndex.generated.stored
+								)
+							)
+							uniqueKeys.push({
+								columnName: genName,
+								prefix: MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)).prefix,
+								generated: true,
+								name: normalizedIndex.name
+							})
+						} else {
+							uniqueKeys.push({
+								columnName: column.name,
+								prefix: MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)).prefix,
+								name: normalizedIndex.name
+							})
+						}
+					} else if (normalizedIndex.type === 'index') {
+						if (normalizedIndex.generated && normalizedIndex.generated.expression) {
+							const genName = normalizedIndex.name || `${column.name}_gen`
+							columnsSql.push(
+								MySQLUtil.buildGeneratedColumnDefinition(
+									genName,
+									column,
+									normalizedIndex.generated.expression,
+									'create',
+									normalizedIndex.generated.stored
+								)
+							)
+							indexKeys.push({
+								columnName: genName,
+								prefix: MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)).prefix,
+								generated: true,
+								name: normalizedIndex.name
+							})
+						} else {
+							indexKeys.push({
+								columnName: column.name,
+								prefix: MySQLUtil.ensureIndexPrefix(normalizedIndex, MySQLUtil.getColumnOptionLength(column)).prefix,
+								name: normalizedIndex.name
+							})
 						}
 					}
 				}
 			}
+		}
 
-			if (primaryKeys.length > 0) {
-				columnsSql.push(`PRIMARY KEY (\`${primaryKeys.join('`, `')}\`)`)
-			}
+		if (primaryKeys.length > 0) {
+			columnsSql.push(`PRIMARY KEY (\`${primaryKeys.join('`, `')}\`)`)
+		}
 
-			uniqueKeys.forEach(({ columnName, prefix, name }) => {
-				const prefixStr = prefix !== undefined ? `(${prefix})` : ''
-				const indexName = name || `uk_${columnName}`
-				columnsSql.push(`UNIQUE KEY \`${indexName}\` (\`${columnName}\`${prefixStr})`)
-			})
+		uniqueKeys.forEach(({ columnName, prefix, name }) => {
+			const prefixStr = prefix !== undefined ? `(${prefix})` : ''
+			const indexName = name || `uk_${columnName}`
+			columnsSql.push(`UNIQUE KEY \`${indexName}\` (\`${columnName}\`${prefixStr})`)
+		})
 
-			indexKeys.forEach(({ columnName, prefix, name }) => {
-				const prefixStr = prefix !== undefined ? `(${prefix})` : ''
-				const indexName = name || `idx_${columnName}`
-				columnsSql.push(`KEY \`${indexName}\` (\`${columnName}\`${prefixStr})`)
-			})
+		indexKeys.forEach(({ columnName, prefix, name }) => {
+			const prefixStr = prefix !== undefined ? `(${prefix})` : ''
+			const indexName = name || `idx_${columnName}`
+			columnsSql.push(`KEY \`${indexName}\` (\`${columnName}\`${prefixStr})`)
+		})
 
 		const tableComment = options.comment ? ` COMMENT '${MySQLUtil.escapeSqlString(options.comment)}'` : ''
 
@@ -897,7 +1040,13 @@ export class MySQLUtil extends DbFit {
 	 * @param mode 模式: 'create'|'add'|'change'
 	 * @param stored 是否为 STORED（默认为 true）
 	 */
-	private static buildGeneratedColumnDefinition(genName: string, baseColumn: Column, expression: string, mode: 'create' | 'add' | 'change', stored?: boolean) {
+	private static buildGeneratedColumnDefinition(
+		genName: string,
+		baseColumn: Column,
+		expression: string,
+		mode: 'create' | 'add' | 'change',
+		stored?: boolean
+	) {
 		const parts: string[] = []
 
 		if (mode === 'add') {
