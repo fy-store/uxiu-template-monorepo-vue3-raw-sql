@@ -1,90 +1,149 @@
-import type { Admin, AllInfoAdmin, QueryAdmin, QueryAdminCount, CreateAdmin, UpdateAdmin } from '#db'
-import { execute } from '#dbConnect'
-import { ifel } from '#utils'
+import type { AdminAll, Admin, CreateAdminParams, GetAdminListParams, UpdateAdminParams } from './types'
+import { DbFit } from '@server/db/connect'
+import { tableMap } from '@server/config'
+export * from './types'
 
-const { admin } = sys.conf.mysql.tables
-
-export function getList(params: QueryAdmin): Promise<[Admin[], any]>
-export function getList(params: QueryAdmin, allInfo: boolean): Promise<[AllInfoAdmin[], any]>
-/** 获取管理员列表 */
-export function getList(options: QueryAdmin, allInfo?: boolean) {
-	const sql = /*sql*/ `
-        select id, name, account, authority, create_time as createTime, update_time as updateTime
-		${ifel(allInfo, ', is_super as isSuper, password')}
-		from ${admin.name} 
-		where ${ifel(options.name, "name like concat('%', ?, '%') and")} delete_time is null 
-		order by id desc
-		limit ?, ? 
-    `
-	if (options.name) {
-		return execute(sql, [options.name, (options.page - 1) * options.size, options.size])
+const admin = tableMap.admin
+export class DbAdmin extends DbFit {
+	create(p: CreateAdminParams) {
+		return this.query<void>(
+			'void',
+			/*sql*/ `
+            	INSERT INTO ${admin.tableName} (name, account, password, is_super, authority, remark)
+            	VALUES (:name, :account, :password, :isSuper, :authority, :remark)
+        	`,
+			{
+				...p,
+				authority: JSON.stringify(p.authority ?? [])
+			}
+		)
 	}
-	return execute(sql, [(options.page - 1) * options.size, options.size])
-}
 
-/** 获取管理员数量 */
-export function getCount(params: QueryAdminCount): Promise<[[{ count: number }], any]> {
-	const sql = /*sql*/ `
-        select count(id) as count
-		from ${admin.name} 
-		where ${ifel(params.name, "name like concat('%', ?, '%') and")} delete_time is null 
-		order by id desc
-    `
-	if (params.name) {
-		return execute(sql, [params.name])
+	del(id: number) {
+		return this.query<void>(
+			'void',
+			/*sql*/ `
+				UPDATE ${admin.tableName} SET delete_time = :deleteTime WHERE id = :id AND delete_time IS NULL
+		`,
+			{ id, deleteTime: new Date() }
+		)
 	}
-	return execute(sql)
-}
 
-export function getById(id: number): Promise<[Admin[], any]>
-export function getById(id: number, allInfo: boolean): Promise<[AllInfoAdmin[], any]>
-/** 通过 `id` 获取管理员信息 */
-export function getById(id: number, allInfo?: boolean) {
-	const sql = /*sql*/ `
-        select id, name, account, authority, create_time as createTime, update_time as updateTime 
-		${ifel(allInfo, ', password, is_super as isSuper')}
-		from ${admin.name} where id = ? and delete_time is null
-    `
-	return execute(sql, [id])
-}
+	update(p: UpdateAdminParams) {
+		return this.query<void>(
+			'void',
+			/*sql*/ `
+				UPDATE ${admin.tableName} SET
+					${this.ifNotVoid(p.name, 'name = :name,')}
+					${this.ifNotVoid(p.password, 'password = :password,')}
+					${this.ifNotVoid(p.isSuper, 'is_super = :isSuper,')}
+					${this.ifNotVoid(p.authority, 'authority = :authority,')}
+					${this.ifNotVoid(p.remark, 'remark = :remark,')}
+					update_time = :updateTime
+				WHERE id = :id AND delete_time IS NULL
+			`,
+			{
+				...p,
+				authority: p.authority ? JSON.stringify(p.authority) : void 0,
+				updateTime: new Date()
+			}
+		)
+	}
 
-export function getByAccount(account: string): Promise<[Admin[], any]>
-export function getByAccount(account: string, allInfo: boolean): Promise<[AllInfoAdmin[], any]>
-/** 通过账号获取管理员信息 */
-export function getByAccount(account: string, allInfo?: boolean) {
-	const sql = /*sql*/ `
-        select id, name, account, authority, create_time as createTime, update_time as updateTime 
-		${ifel(allInfo, ', delete_time, password, is_super as isSuper')}
-		from ${admin.name} where account = ? and delete_time is null
-    `
-	return execute(sql, [account])
-}
+	async get(id: number, allInfo?: boolean): Promise<Admin>
+	async get(id: number, allInfo: true): Promise<AdminAll>
+	async get(id: number, allInfo?: boolean): Promise<Admin> {
+		const info = await this.query(
+			'info',
+			/*sql*/ `
+            	SELECT id, name, account, authority, create_time AS createTime
+            		${this.ifel(allInfo, ', is_super as isSuper, password, remark, update_time AS updateTime')}
+            	FROM ${admin.tableName}
+            	WHERE id = :id AND delete_time IS NULL
+        	`,
+			{ id }
+		)
+		if (info && allInfo) {
+			info.isSuper = !!info.isSuper
+		}
+		return info
+	}
 
-/** 创建管理员 */
-export function create(params: CreateAdmin) {
-	const { name = '未命名', account, password, authority = [], isSuper = false } = params
-	const sql = /*sql*/ `
-        insert into ${admin.name} (name, account, password, authority, is_super) 
-		values (?, ?, ?, ?, ?)
-    `
-	return execute(sql, [name, account, password, authority, isSuper])
-}
+	/** allInfo 也不包含密码, 为获取管理员基础信息专用 */
+	async getInfo(id: number, allInfo?: boolean): Promise<Admin>
+	/** allInfo 也不包含密码, 为获取管理员基础信息专用 */
+	async getInfo(id: number, allInfo: true): Promise<Omit<AdminAll, 'password'>>
+	/** allInfo 也不包含密码, 为获取管理员基础信息专用 */
+	async getInfo(id: number, allInfo?: boolean): Promise<Admin> {
+		const info = await this.query(
+			'info',
+			/*sql*/ `
+            	SELECT id, name, account, authority, create_time AS createTime
+            		${this.ifel(allInfo, ', is_super as isSuper, remark, update_time AS updateTime')}
+            	FROM ${admin.tableName}
+            	WHERE id = :id AND delete_time IS NULL
+        	`,
+			{ id }
+		)
+		if (info && allInfo) {
+			info.isSuper = !!info.isSuper
+		}
+		return info
+	}
 
-/** 通过 `id` 删除管理员 */
-export function deleteById(id: number) {
-	const sql = /*sql*/ `
-        update ${admin.name} set delete_time = now() where id = ? and delete_time is null
-    `
-	return execute(sql, [id])
-}
+	async getByAccount(account: string, allInfo?: boolean): Promise<Admin>
+	async getByAccount(account: string, allInfo: true): Promise<AdminAll>
+	async getByAccount(account: string, allInfo?: boolean): Promise<Admin> {
+		const info = await this.query(
+			'info',
+			/*sql*/ `
+            	SELECT id, name, account, authority, create_time AS createTime
+            		${this.ifel(allInfo, ', is_super as isSuper, password, remark, update_time AS updateTime')}
+            	FROM ${admin.tableName}
+            	WHERE account = :account AND delete_time IS NULL
+        	`,
+			{ account }
+		)
+		if (info && allInfo) {
+			info.isSuper = !!info.isSuper
+		}
+		return info
+	}
 
-export function updateById(id: number, params: UpdateAdmin) {
-	const { name, password, authority, isSuper } = params
+	async getList(p: GetAdminListParams, allInfo?: boolean): Promise<Admin[]>
+	async getList(p: GetAdminListParams, allInfo: true): Promise<Omit<AdminAll, 'password'>[]>
+	async getList(p: GetAdminListParams, allInfo?: boolean): Promise<Admin[]> {
+		const list: AdminAll[] = await this.query(
+			'list',
+			/*sql*/ `
+            	SELECT id, name, account, authority, create_time AS createTime
+            		${this.ifel(allInfo, ', is_super as isSuper, remark, update_time AS updateTime')}
+            	FROM ${admin.tableName}
+            	WHERE ${this.ifNotVoid(p.name, `name LIKE concat('%', :name, '%') AND`)} 
+					${this.ifNotVoid(p.account, `account LIKE concat('%', :account, '%') AND`)}
+					delete_time IS NULL
+            	${this.ifel(p.page && p.size, `LIMIT :page, :size`)}
+        	`,
+			{ ...p, page: p.page && p.size ? (p.page - 1) * p.size : void 0, size: p.size }
+		)
+		list.forEach((it) => {
+			if (it?.isSuper !== void 0) {
+				it.isSuper = !!it.isSuper
+			}
+		})
+		return list
+	}
 
-	const sql = /*sql*/ `
-	update ${admin.name}
-	set name = ?, password = ?, authority = ?, update_time = now(), is_super = ?
-	where id = ? and delete_time is null
-	`
-	return execute(sql, [name, password, authority, isSuper, id])
+	getCount(p: Omit<GetAdminListParams, 'page' | 'size'>) {
+		return this.query<{ count: number }>(
+			'info',
+			/*sql*/ `
+            	SELECT COUNT(*) as count FROM ${admin.tableName}
+            	WHERE ${this.ifNotVoid(p.name, `name LIKE concat('%', :name, '%') AND`)} 
+					${this.ifNotVoid(p.account, `account LIKE concat('%', :account, '%') AND`)} 
+					delete_time IS NULL
+        	`,
+			p
+		)
+	}
 }

@@ -1,7 +1,8 @@
 import mysql from 'mysql2/promise'
+import { sys } from '@server/config'
 
 export default async () => {
-	const { host, user, port, password, database } = sys.conf.mysql.connect
+	const { host, user, port, password, database } = sys.config.mysql.connect
 	const connection = await mysql.createConnection({
 		host,
 		user,
