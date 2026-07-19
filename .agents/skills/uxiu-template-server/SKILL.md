@@ -1,9 +1,9 @@
 ---
-name: file-store-server
-description: 在 file-store 仓库中开发或修改 Node.js/Koa 后端。用于 packages/server 下的 v1 API、Zod schema、共享 API 类型、权限处理、数据库 DbFit 模块、SQL、文件存储、中间件和配置任务；要求遵循项目响应协议、软删除、参数化 SQL 与现有模块边界。
+name: uxiu-template-server
+description: 在 uxiu-template monorepo 模板中开发或修改 Node.js/Koa 后端。用于 packages/server 下的 v1 API、路由注册与 404/405 排查、Zod schema、共享 API 类型、权限处理、数据库 DbFit 模块、SQL、文件存储、中间件和配置任务；要求遵循项目响应协议、软删除、参数化 SQL 与现有模块边界。
 ---
 
-# File Store Server
+# Uxiu Template Server
 
 先读取仓库根目录 `AGENTS.md`，再读取目标 API、数据库模块及其导出入口。优先沿用相邻模块的 alias 和请求体来源。
 
@@ -16,7 +16,8 @@ description: 在 file-store 仓库中开发或修改 Node.js/Koa 后端。用于
 5. 将前端需要复用的 API 类型从 API 模块导出，并确认 `packages/server/src/index.ts` 的类型导出链路。
 6. 新增受登录权限控制的 API 时，将真实请求方法和完整 v1 路径同步到 `src/config/authority/index.ts`；一个业务流程调用多个接口时逐个登记。
 7. 检查事务、并发、软删除、文件系统清理和异常路径。
-8. 运行目标包可用的构建或类型检查，区分本次错误和仓库既有错误。
+8. 修改路由后同时检查路由栈，并向当前监听端口发出真实 HTTP 请求；记录方法、最终 URL、状态码和响应体，区分代码问题、旧进程和前端配置问题。
+9. 运行目标包可用的构建或类型检查，区分本次错误和仓库既有错误。
 
 ## 模块边界
 
@@ -29,7 +30,9 @@ description: 在 file-store 仓库中开发或修改 Node.js/Koa 后端。用于
 
 ## API 要求
 
-- 使用 `sys.routerV1` 注册 v1 路由。
+- 处理器文件导出自己的 `Router`，只注册模块内相对路径；模块 `index.ts` 使用子路由的 `routes()` 聚合。
+- `src/api/index.ts` 统一设置 `${sys.config.apiPath}/v1` 前缀并聚合各业务路由；`src/index.ts` 依次挂载顶层 `router.routes()` 和 `router.allowedMethods()`，再进入静态资源与 404 中间件。
+- `allowedMethods()` 只在应用入口为顶层 API Router 挂载一次，不在子路由重复挂载。
 - 根据相邻接口选择 `ctx.request.body`、`ctx.request.xssBody` 或 `ctx.query`。
 - 成功响应使用 `{ code: 0, msg, data? }`；已知失败使用 `{ code: 1, msg }`。
 - 不手写与现有响应、中间件或权限模块重复的逻辑。
@@ -39,12 +42,12 @@ description: 在 file-store 仓库中开发或修改 Node.js/Koa 后端。用于
 
 ## 新增模块
 
-- API 模块：创建或扩展 `src/api/v1/<module>`，同步 `schema.ts`、`types.ts`、处理器和 `index.ts` 副作用导入。
+- API 模块：创建或扩展 `src/api/v1/<module>`，同步 `schema.ts`、`types.ts`、处理器和 `index.ts` 路由聚合。
 - 数据库模块：放入 `src/db/modules/<module>`，从数据库聚合入口导出，API 不直接编写跨职责 SQL。
 - 公共类型：从 API 模块导出，并检查 `src/api/index.ts`、`src/index.ts` 和前端 `@server/index` 消费方。
 - 权限：逐项登记所有受保护路由，核对实际 HTTP 方法、`v1/` 路径、权限 ID 唯一性及管理员权限选择器展示。
 - 权限兼容：新增权限默认不授予已有账号；修改已有权限规则时保留稳定 ID，并确保登录或迁移逻辑按当前配置重新序列化。
-- 验证：搜索新模块名称确认注册、导出、权限和调用方完整，再运行 server 类型检查及受影响前端构建。
+- 验证：搜索新模块名称确认注册、导出、权限和调用方完整；对当前运行服务发送匹配方法的真实请求，再运行 server 类型检查及受影响前端构建。
 
 ## 数据库要求
 

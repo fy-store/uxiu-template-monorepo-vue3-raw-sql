@@ -1,4 +1,0 @@
-interface:
-  display_name: "File Store Web"
-  short_description: "遵循项目既有封装、组件与代码风格开发 Vue 3 前端功能"
-  default_prompt: "Use $file-store-web to implement this Vue frontend task with the repository conventions."

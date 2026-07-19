@@ -15,14 +15,17 @@ admin/
 └── deleteAdmin.ts
 ```
 
-`index.ts` 负责导出类型并通过副作用导入注册处理器：
+处理器文件分别导出局部 Router，`index.ts` 负责导出类型并聚合子路由：
 
 ```ts
+import { Router } from '@koa/router'
+import { createAdminRouter } from './createAdmin'
+import { getAdminListRouter } from './getAdminList'
+
 export type * from './types'
-import './createAdmin'
-import './getAdminList'
-import './deleteAdmin'
-import './updateAdmin'
+
+export const adminRouter = new Router()
+adminRouter.use(createAdminRouter.routes(), getAdminListRouter.routes())
 ```
 
 ## 新增业务模块检查清单
@@ -31,9 +34,9 @@ import './updateAdmin'
 
 1. `schema.ts` 定义输入校验，`types.ts` 通过 `z.infer` 导出参数类型。
 2. 处理器只负责校验、权限前置条件、流程编排和响应；数据访问进入对应 `DbXxx`。
-3. 模块 `index.ts` 使用副作用导入注册每个处理器，并导出前端需要的类型。
-4. 上级 API 聚合入口和 `packages/server/src/index.ts` 能导出公开类型。
-5. `src/config/authority/index.ts` 登记每条受保护路由；方法和路径必须与 `sys.routerV1.get/post/...` 完全一致。
+3. 处理器导出局部 Router，模块 `index.ts` 使用各子路由的 `routes()` 聚合，并导出前端需要的类型。
+4. `src/api/index.ts` 在顶层 Router 统一设置 v1 前缀并聚合业务路由；`packages/server/src/index.ts` 挂载 `routes()` 后紧接 `allowedMethods()`，同时保持公开类型导出链完整。
+5. `src/config/authority/index.ts` 登记每条受保护路由；方法和路径必须与处理器 Router 的方法、顶层 v1 前缀完全一致。
 6. 同一前端操作调用准备、上传、合并等多个接口时，每个接口都需要独立权限规则。
 7. 修改已有权限的方法或路径时保持权限 ID 稳定，并确认已存储规则会在登录时按 ID 映射到当前配置；新增权限仍由管理员显式授予。
 8. 搜索模块名和请求路径，确认没有遗漏调用方、旧路由或失效权限项。
@@ -44,9 +47,11 @@ import './updateAdmin'
 import { DbAdmin } from '@server/db'
 import { createAdminParamsSchema } from './schema'
 import { defineCheckError } from '@server/utils'
-import { sys } from '@server/config'
+import { Router } from '@koa/router'
 
-sys.routerV1.post('/createAdmin', async (ctx) => {
+export const createAdminRouter = new Router()
+
+createAdminRouter.post('/createAdmin', async (ctx) => {
 	const q = createAdminParamsSchema.safeParse(ctx.request.body)
 	if (!q.success) {
 		ctx.body = defineCheckError(q.error)
@@ -64,6 +69,21 @@ sys.routerV1.post('/createAdmin', async (ctx) => {
 ```
 
 实例化数据库类时传入 `{ ctx }`，以复用数据库上下文、日志和事务能力。
+
+顶层路由统一设置 API 前缀：
+
+```ts
+import { Router } from '@koa/router'
+import path from 'node:path/posix'
+import { sys } from '@server/config'
+import { adminRouter } from './v1/admin'
+
+export const router = new Router({
+	prefix: path.join(sys.config.apiPath, 'v1')
+})
+
+router.use(adminRouter.routes())
+```
 
 ## Schema 与类型
 
@@ -132,3 +152,10 @@ import { Encryptor } from '@common/encryptor'
 - 受影响 API 导出链检查。
 - SQL 占位参数与参数对象逐项核对。
 - 前端调用类型或构建检查（当 API 类型发生变化时）。
+
+路由改动额外执行以下检查：
+
+1. 检查顶层 Router 的 stack，确认目标方法和完整路径存在。
+2. 确认当前端口对应的进程来自本工作区，并在路由改动后已经重载。
+3. 使用与前端相同的方法、Origin、请求头和最终 URL 发出真实 HTTP 请求；跨域请求同时验证 `OPTIONS` 预检。
+4. 根据响应体区分应用 404、权限拦截、反向代理或旧服务响应。仅看到 stack 中存在路由不能证明当前运行服务已经加载它。

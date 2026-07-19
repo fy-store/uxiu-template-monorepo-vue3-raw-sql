@@ -45,6 +45,16 @@ list.value = data?.list ?? []
 2. `packages/web/src/api/index.ts` 是否需要导出模块。
 3. GET 参数是否放在 `{ params }`，文件是否使用 `FormData`。
 
+排查 404/405 时不要只看响应拦截器包装后的 `msg`。记录开发者工具中的 Request Method、Request URL、Status Code 和响应体，再逐项核对：
+
+1. `.env.development` 或 `.env.production` 中的 `VITE_API_URL`。
+2. Axios `baseURL` 与请求函数相对路径拼接出的最终 URL。
+3. 后端顶层 Router 的 API/v1 前缀、处理器方法和相对路径。
+4. 当前监听端口的进程是否来自本工作区，代码变更后是否已经重载。
+5. 跨域请求的 `OPTIONS` 预检是否成功。
+
+使用与浏览器相同的方法、Origin、请求头和请求体直接访问当前服务。直接请求成功而浏览器仍失败时，再检查代理、Service Worker 或浏览器缓存；不要重复修改已经可达的路由。
+
 ## Vue 模块
 
 - 对话框、抽屉等子功能通常拆为同目录组件，并通过 `success` 事件刷新父列表。

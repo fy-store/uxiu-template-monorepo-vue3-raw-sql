@@ -1,9 +1,9 @@
 ---
-name: file-store-common
-description: 在 file-store 仓库中创建、修改或复用 packages/common 的前后端通用 TypeScript 模块。用于加解密、哈希、并发控制、二进制流、跨运行时工具及任何需要同时供 web 和 server 使用的无项目配置依赖能力；要求从具体 @common 子路径导入并保持浏览器与 Node.js 兼容。
+name: uxiu-template-common
+description: 在 uxiu-template monorepo 模板中创建、修改或复用 packages/common 的前后端通用 TypeScript 模块。用于加解密、哈希、并发控制、二进制流、跨运行时工具及任何需要同时供 web 和 server 使用的无项目配置依赖能力；要求从具体 @common 子路径导入并保持浏览器与 Node.js 兼容。
 ---
 
-# File Store Common
+# Uxiu Template Common
 
 先读取仓库根目录 `AGENTS.md`，再搜索 `packages/common/src` 和 web/server 中是否已有相同能力。只有真正前后端通用且不依赖项目配置的代码才放入 common。
 

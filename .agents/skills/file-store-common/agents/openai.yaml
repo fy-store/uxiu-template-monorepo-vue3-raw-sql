@@ -1,4 +1,0 @@
-interface:
-  display_name: "File Store Common"
-  short_description: "设计并复用同时兼容浏览器与 Node.js 的前后端通用 TypeScript 模块"
-  default_prompt: "Use $file-store-common to implement or reuse a shared module for this repository."

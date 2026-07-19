@@ -1,9 +1,9 @@
 ---
-name: file-store-web
-description: 在 file-store 仓库中开发或修改 Vue 3 前端功能。用于 packages/web 下的视图、API 请求、组件、framework hooks、指令、工具、Worker、文件上传下载与预览任务；要求优先复用 Element Plus、UnoCSS、项目 hooks、@server 类型和 @common 通用模块，并保持现有代码风格。
+name: uxiu-template-web
+description: 在 uxiu-template monorepo 模板中开发或修改 Vue 3 前端功能。用于 packages/web 下的视图、API 请求与 404/405 排查、组件、framework hooks、指令、工具、Worker、文件上传下载与预览任务；要求优先复用 Element Plus、UnoCSS、项目 hooks、@server 类型和 @common 通用模块，并保持现有代码风格。
 ---
 
-# File Store Web
+# Uxiu Template Web
 
 先读取仓库根目录 `AGENTS.md`，再检查目标文件相邻模块。以现有实现为准处理局部差异，不机械套用示例。
 
@@ -20,7 +20,8 @@ description: 在 file-store 仓库中开发或修改 Vue 3 前端功能。用于
 4. 按相邻 Vue 文件的组织方式实现 template、`<script setup lang="ts">` 和 scoped 样式。
 5. 处理异步任务的错误、取消、组件卸载和资源释放；Worker、对象 URL、事件监听器必须有明确清理路径。
 6. 新模块调用后端受保护 API 时，确认 server 已为工作流中的每个请求登记权限。
-7. 运行最窄验证，再运行 `pnpm --dir packages/web build-only`。类型检查失败时区分本次诊断和仓库既有诊断。
+7. 排查请求错误时记录 Axios 的 `baseURL`、相对路径、HTTP 方法和浏览器最终 URL，并用同样的请求验证当前后端进程；不要只根据封装后的错误消息判断路由状态。
+8. 运行最窄验证，再运行 `pnpm --dir packages/web build-only`。类型检查失败时区分本次诊断和仓库既有诊断。
 
 ## 编码要求
 
@@ -38,6 +39,7 @@ description: 在 file-store 仓库中开发或修改 Vue 3 前端功能。用于
 - `code !== 0` 时展示错误并决定是否清空状态或提前返回。
 - 获取列表时为缺省数据提供明确回退；不要用非空断言掩盖可能缺失的数据，除非接口成功契约已经保证。
 - 上传文件使用 `FormData`，沿用现有进度回调格式。
+- 404/405 排查必须同时核对 `.env.*` 中的 `VITE_API_URL`、请求函数的相对路径、后端路由前缀和真实请求方法；跨域请求还要检查 `OPTIONS` 预检。
 
 ## 新增模块
 
