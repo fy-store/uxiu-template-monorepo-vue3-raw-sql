@@ -1,11 +1,23 @@
 {
   "type": "module",
-  "name": "uxiu-template-monorepo-vue3-raw-sql",
-  "version": "0.3.0",
-  "description": "monorepo + vue3 + koa + raw sql",
+  "name": "file-store",
+  "version": "1.0.0",
+  "description": "文件管理系统",
   "scripts": {
     "build": "pnpm -r build && tsx ./scripts/moveDist.ts",
-    "dev": "pnpm -r dev"
+    "dev": "pnpm -r dev",
+    "dev:server": "cd ./packages/server && node --run dev",
+    "debug:server": "cd ./packages/server && node --run debug",
+    "dev:web": "cd ./packages/web && node --run dev",
+    "test": "pnpm run type-check",
+    "type-check": "pnpm run type-check:common && pnpm run type-check:server && pnpm run type-check:web",
+    "type-check:common": "pnpm --dir packages/common exec tsc --noEmit -p tsconfig.json --pretty false",
+    "type-check:server": "pnpm --dir packages/server exec tsc --noEmit -p tsconfig.json --pretty false",
+    "type-check:web": "pnpm --dir packages/web type-check",
+    "init:db": "cd ./packages/server && node --run init:db",
+    "init:root": "cd ./packages/server && node --run init:root",
+    "key": "cd ./packages/server && node --run key",
+    "key:pair": "cd ./packages/server && node --run key:pair"
   },
   "author": "feiYu <feiyucode@gmail.com>",
   "license": "MIT",
@@ -14,34 +26,27 @@
     "uxiu-cli"
   ],
   "engines": {
-    "node": "^18.0.0 || ^20.0.0 || >=22.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/fy-store/uxiu-template-monorepo-vue3-raw-sql.git"
+    "node": ">=22.0.0"
   },
   "dependencies": {
-    "axios": "^1.8.1",
-    "core-js": "^3.41.0",
-    "dayjs": "^1.11.13",
-    "js-yaml": "^4.1.0",
-    "picocolors": "^1.1.1",
-    "uxiu": "^0.12.0"
+    "@ffmpeg/core": "0.12.10",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
+    "axios": "^1.18.1",
+    "core-js": "^3.49.0",
+    "dayjs": "^1.11.21",
+    "event-imt": "0.2.7",
+    "json5": "^2.2.3",
+    "mime": "^4.1.0",
+    "uxiu": "0.22.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/js-yaml": "^4.0.9",
-    "@types/node": "^22.13.8",
-    "fs-extra": "^11.3.0",
-    "tsx": "^4.19.2",
-    "typescript": "^5.8.2"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "bcrypt",
-      "core-js",
-      "esbuild",
-      "vue-demi"
-    ]
+    "@types/node": "^26.1.1",
+    "fs-extra": "^11.3.6",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   }
 }

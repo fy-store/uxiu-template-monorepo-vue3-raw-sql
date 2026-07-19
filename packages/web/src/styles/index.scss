@@ -1,0 +1,12 @@
+@use './reset.scss';
+@use './custom-element.scss';
+
+html {
+    font-size: 14px;
+    line-height: 1.2;
+    color: #424242;
+}
+
+body {
+    min-width: 750px;
+}

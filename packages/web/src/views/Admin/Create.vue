@@ -1,24 +1,31 @@
 <template>
-	<el-button @click="model = true">创建管理员</el-button>
-	<el-dialog v-model="model" title="创建管理员" width="600px" destroy-on-close>
-		<el-form :model="formData" label-width="60px" :rules="rules" ref="Form" @submit.prevent="submit">
-			<el-form-item label="名称">
+	<el-button @click="initFormData"><i-ep-plus class="mr-5px text-12px" />创建管理员</el-button>
+	<el-drawer
+		v-model="visible"
+		@close="resetFormData"
+		title="创建管理员"
+		size="800px"
+		destroy-on-close
+		:close-on-click-modal="false"
+	>
+		<el-form :model="formData" label-width="110px" :rules="rules" ref="Form" @submit.prevent="submit">
+			<el-form-item label="管理员名称" prop="name">
 				<el-input v-model="formData.name" placeholder="请输入管理员名称" />
 			</el-form-item>
-			<el-form-item label="账号" prop="account">
+			<el-form-item label="管理员账号" prop="account">
 				<el-input v-model="formData.account" placeholder="请输入管理员账号" />
 			</el-form-item>
-			<el-form-item label="密码" prop="password">
-				<el-input v-model.trim="formData.password" placeholder="请输入管理员密码" type="password" show-password />
+			<el-form-item label="管理员密码" prop="password">
+				<el-input v-model="formData.password" placeholder="请输入管理员密码" type="password" show-password clearable />
 			</el-form-item>
-			<el-form-item label="超管" v-if="userInfo.info.isSuper">
-				<el-select v-model="formData.isSuper" placeholder="Select" class="w-100-p">
-					<el-option v-for="item in isSuperOptions" :key="item.id" :label="item.name" :value="item.id" />
+			<el-form-item label="是否为超管" v-if="userInfo.info.isSuper">
+				<el-select v-model="formData.isSuper" placeholder="Select" class="w-full">
+					<el-option v-for="(item, i) in isSuperOptions" :key="i" :label="item.name" :value="item.id" />
 				</el-select>
 			</el-form-item>
-			<el-form-item label="权限">
+			<el-form-item v-if="!formData.isSuper" label="管理员权限" prop="authority">
 				<el-tree
-					class="w-100-p"
+					class="w-full"
 					:data="authorityOptions"
 					node-key="id"
 					:props="treeProps"
@@ -26,86 +33,83 @@
 					@check="authorityCheck"
 				/>
 			</el-form-item>
+			<el-form-item v-else label="管理员权限">
+				<span class="text-#909399">超级管理员默认拥有全部权限，无需勾选</span>
+			</el-form-item>
+			<el-form-item label="备注" v-if="userInfo.info.isSuper">
+				<el-input type="textarea" v-model="formData.remark" placeholder="请输入备注"></el-input>
+			</el-form-item>
 		</el-form>
-		<template #footer>
-			<div>
-				<el-button @click="model = false">取 消</el-button>
-				<el-button type="primary" @click="submit">提 交</el-button>
-			</div>
-		</template>
-	</el-dialog>
+		<div class="flex justify-center flex-wrap">
+			<el-button @click="visible = false">取 消</el-button>
+			<el-button type="primary" @click="submit">提交表单</el-button>
+		</div>
+	</el-drawer>
 </template>
 
 <script lang="ts" setup>
-	import type { FormInstance, FormRules } from 'element-plus'
-	import type { CreateAdmin, Authority, IsSuperOption } from '@t/index'
-	import { reactive, ref, useTemplateRef, watch } from 'vue'
-	import { createAdmin, getAuthoritySelect, getIsSuperSelect } from '@/api'
+	import type { CheckedInfo, FormInstance, FormRules } from 'element-plus'
+	import type { CreateAdminParams, Authority } from '@server/index'
+	import { reactive, ref, useTemplateRef } from 'vue'
+	import { admin, account } from '@/api'
 	import { useUserInfo } from '@/stores'
 
 	const emit = defineEmits(['success'])
-	const model = defineModel({ default: false })
+	const visible = ref(false)
 	const treeProps = {
 		label: 'name'
 	}
+
 	const FormRef = useTemplateRef<FormInstance>('Form')
-	const rules = reactive<FormRules<CreateAdmin>>({
+	const rules = reactive<FormRules<CreateAdminParams>>({
+		name: [{ required: true, message: '请输入管理员名称', trigger: 'blur' }],
 		account: [{ required: true, message: '管理员账号长度必须 >= 3 并且 <= 20', min: 3, max: 20, trigger: 'blur' }],
-		password: [{ required: false, message: '管理员密码长度必须 >= 5 并且 <= 20', min: 5, max: 20, trigger: 'blur' }]
+		password: [{ required: true, message: '管理员密码长度必须 >= 5 并且 <= 20', min: 5, max: 20, trigger: 'blur' }]
 	})
 
 	const userInfo = useUserInfo()
-
 	const authorityOptions = ref<Authority[]>([])
 	async function getAuthorityOptions() {
-		const { code, msg, data = [] } = await getAuthoritySelect()
+		const { code, msg, data = [] } = await account.getAuthoritySelect()
 		if (code !== 0) {
 			ElMessage({ message: msg, type: 'error' })
 		}
 		authorityOptions.value = data
 	}
 
-	const isSuperOptions = ref<IsSuperOption[]>([])
-	async function getIsSuperOptions() {
-		const { code, msg, data } = await getIsSuperSelect()
-		if (code !== 0) {
-			ElMessage({ message: msg, type: 'error' })
-			isSuperOptions.value = []
-			formData.value.isSuper = void 0
-			return
-		}
-		isSuperOptions.value = data.options
-		formData.value.isSuper = data.default
+	/** 选择权限 */
+	function authorityCheck(_: unknown, { checkedKeys }: CheckedInfo) {
+		formData.value.authority = checkedKeys.map(String)
 	}
 
-	function authorityCheck(_: any, { checkedKeys }: { checkedKeys: string[] }) {
-		formData.value.authority = checkedKeys
-	}
+	const isSuperOptions = ref([
+		{ id: true, name: '是' },
+		{ id: false, name: '否' }
+	])
 
-	const formData = ref<CreateAdmin>({
-		name: void 0,
+	const formData = ref<CreateAdminParams>({
+		name: '',
 		account: '',
 		password: '',
 		authority: [],
-		isSuper: void 0
+		isSuper: false,
+		remark: ''
 	})
 
-	watch(
-		() => model.value,
-		async function () {
-			if (model.value) {
-				const loading = ElLoading.service({ text: '加载中' })
-				formData.value = { name: void 0, account: '', password: '', authority: [], isSuper: void 0 }
-				await Promise.all([getAuthorityOptions(), getIsSuperOptions()])
-				loading.close()
-			}
-		},
-		{ immediate: true }
-	)
+	async function initFormData() {
+		const loading = ElLoading.service({ text: '加载中' })
+		await getAuthorityOptions()
+		loading.close()
+		visible.value = true
+	}
+
+	function resetFormData() {
+		FormRef.value!.resetFields()
+	}
 
 	async function submit() {
 		try {
-			await (FormRef.value as FormInstance).validate()
+			await FormRef.value!.validate()
 		} catch (error) {
 			ElMessage({
 				message: '请保证所有必填项都填写',
@@ -115,7 +119,8 @@
 		}
 
 		const loading = ElLoading.service({ text: '创建中' })
-		const { code, msg } = await createAdmin(formData.value)
+		const body: CreateAdminParams = formData.value
+		const { code, msg } = await admin.createAdmin(body)
 		loading.close()
 		if (code !== 0) {
 			ElMessage({
@@ -125,7 +130,7 @@
 			return
 		}
 
-		model.value = false
+		visible.value = false
 		emit('success')
 		ElMessage({
 			message: msg,

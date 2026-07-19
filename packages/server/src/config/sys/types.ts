@@ -11,8 +11,4 @@ export interface Sys {
 	ipv4: string
 	/** 系统配置信息 */
 	config: ReadonlyDeep<typeof sysConfig>
-	/** 路由器v1 */
-	routerV1: Router
-	/** 开放接口v1 */
-	openApiV1: Router
 }

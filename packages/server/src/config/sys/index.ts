@@ -15,9 +15,7 @@ const _sys: Sys = {
 	config:
 		process.env.NODE_ENV === 'development'
 			? readonly(config)
-			: readonly(json5.parse(fs.readFileSync(path.join(process.cwd(), 'sys.config.json5')).toString())),
-	routerV1: new Router(),
-	openApiV1: new Router()
+			: readonly(json5.parse(fs.readFileSync(path.join(process.cwd(), 'sys.config.json5')).toString()))
 }
 
 export const sys: Sys = readonly.shallowReadonly(_sys)

@@ -13,6 +13,8 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 const srcPath = fileURLToPath(new URL('./src', import.meta.url))
+const serverPath = fileURLToPath(new URL('../server', import.meta.url))
+const commonPath = fileURLToPath(new URL('../common/src', import.meta.url))
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -35,7 +37,7 @@ export default defineConfig({
 				ElementPlusResolver(),
 				// 自动注册图标组件
 				IconsResolver({
-					enabledCollections: ['ep'] // 使用 i-ep-xxx
+					enabledCollections: ['ep'] // 使用 i-ep-xxx (icon-elementPlus-iconName)
 				}),
 				// 自动导入 Element Plus 组件
 				ElementPlusResolver()
@@ -47,9 +49,17 @@ export default defineConfig({
 		}),
 		UnoCSS()
 	],
+	server: {
+		forwardConsole: {
+			unhandledErrors: true,
+			logLevels: ['log', 'info', 'warn', 'debug', 'error']
+		}
+	},
 	resolve: {
 		alias: {
-			'@': srcPath
+			'@': srcPath,
+			'@common': commonPath,
+			'@server': serverPath
 		}
 	}
 })

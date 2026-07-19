@@ -1,12 +1,12 @@
 import fs from 'fs-extra'
 import path from 'path/posix'
-import color from 'picocolors'
+import { styleText } from 'node:util'
 import { name, description, version } from '../package.json'
 
 try {
 	const root = process.cwd()
 	console.log('')
-	console.log(color.green(`正在整合文件...`), '\n')
+	console.log(styleText('green', `正在整合文件...`), '\n')
 	const target = path.join(root, '/dist')
 	if (fs.pathExistsSync(target)) {
 		fs.rmSync(target, { recursive: true })
@@ -18,7 +18,7 @@ try {
 	pack.description = description
 	pack.version = version
 	fs.writeFileSync(path.join(root, '/dist/package.json'), JSON.stringify(pack, null, 2))
-	console.log(color.green(`整合完成: ${path.join(root, 'dist').replaceAll('\\', '/')}`), '\n')
+	console.log(styleText('green', `整合完成: ${path.join(root, 'dist').replaceAll('\\', '/')}`), '\n')
 	process.exit(0)
 } catch (error) {
 	console.error(error)

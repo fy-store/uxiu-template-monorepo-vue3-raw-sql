@@ -1,0 +1,4 @@
+interface:
+  display_name: "File Store Server"
+  short_description: "遵循项目响应协议与模块边界开发 Koa API、权限和数据库功能"
+  default_prompt: "Use $file-store-server to implement this server API or database task with the repository conventions."

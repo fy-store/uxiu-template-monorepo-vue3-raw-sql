@@ -1,2 +1,9 @@
 packages:
   - 'packages/*'
+allowBuilds:
+  '@parcel/watcher': true
+  bcrypt: true
+  core-js: true
+  es5-ext: true
+  esbuild: true
+  vue-demi: true

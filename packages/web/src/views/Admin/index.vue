@@ -1,92 +1,108 @@
 <template>
-	<div class="flex-column h-100-p border-box pd-20">
-		<div class="header border-box pd-30 bg-fff radius-4 flex-space-between mb-20">
+	<div class="h-full box-border flex flex-col p-20px">
+		<div class="header mb-20px box-border flex flex-wrap justify-between rounded-4px bg-white p-30px">
 			<div class="flex">
 				<el-input
-					class="w-200!"
+					class="w-200px!"
 					clearable
 					v-model="searchParams.name"
 					placeholder="请输入管理员名称"
 					:suffix-icon="Search"
 					@change="getTableData"
 				></el-input>
+				<el-button @click="getTableData" class="ml-10px"><i-ep-refresh class="mr-5px text-12px" />刷新</el-button>
 			</div>
 			<Create @success="getTableData"></Create>
 		</div>
 
-		<div class="container flex-1 flex-column bg-fff pd-30 radius-4 min-h-200">
-			<el-table :data="tableData" border class="flex-1 border-box" height="100%">
-				<el-table-column prop="id" label="ID" align="center" />
-				<el-table-column prop="account" label="账号" align="center" />
-				<el-table-column prop="name" label="管理员名称" align="center" />
-				<el-table-column prop="createTime" label="创建时间" align="center" />
-				<el-table-column prop="updateTime" label="更新时间" align="center" />
-				<el-table-column label="操作" align="center">
+		<div class="container min-h-200px flex flex-1 flex-col rounded-4px bg-white p-30px">
+			<el-table :data="tableData" border stripe highlight-current-row class="box-border flex-1" height="100%">
+				<el-table-column min-width="100" prop="account" label="账号" align="center" />
+				<el-table-column min-width="100" prop="name" label="管理员名称" align="center" />
+				<el-table-column
+					min-width="100"
+					prop="isSuper"
+					label="是否超管"
+					align="center"
+					v-if="userInfoStore.info.isSuper"
+				>
+					<template #default="{ row }">
+						<el-tag v-if="row.isSuper">是</el-tag>
+						<el-tag v-else type="info">否</el-tag>
+					</template>
+				</el-table-column>
+				<el-table-column min-width="100" prop="authority" label="权限列表" align="center">
+					<template #default="{ row }">
+						<el-link @click="viewAuthority(row)">预览</el-link>
+					</template>
+				</el-table-column>
+				<el-table-column min-width="100" prop="createTime" label="创建时间" align="center" />
+				<el-table-column
+					min-width="100"
+					prop="updateTime"
+					label="更新时间"
+					align="center"
+					v-if="userInfoStore.info.isSuper"
+				/>
+				<el-table-column min-width="110" label="操作" align="center" fixed="right">
 					<template #default="{ row }">
 						<el-button link type="primary" @click="edit(row)">编辑</el-button>
 						<el-button link type="danger" @click="del(row)">删除</el-button>
 					</template>
 				</el-table-column>
 			</el-table>
-			<el-pagination
-				class="mt-20 flex-end"
-				v-model:current-page="paging.page"
-				v-model:page-size="paging.size"
-				:page-sizes="[1, 2, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 1500, 2000]"
-				layout="total, sizes, prev, pager, next, jumper"
-				:total="paging.count"
-			/>
+			<div class="mt-20px flex flex-wrap justify-end">
+				<Pagination></Pagination>
+			</div>
 		</div>
 		<Edit v-model="editVisible" :data="editData" @success="getTableData"></Edit>
+		<ViewAuthority v-model="viewAuthorityVisible" :data="viewAuthorityData"></ViewAuthority>
 	</div>
 </template>
 
 <script lang="ts" setup>
-	import type { Admin } from '@t/index'
-	import type { SearchParams } from './type'
+	import type { Admin } from '@server/index'
+	import type { SearchParams } from './types'
+	import { admin } from '@/api'
+	import { useUserInfo } from '@/stores'
 	import { Search } from '@element-plus/icons-vue'
-	import { getAdminList, delAdmin } from '@/api'
+	import { usePagination } from '@/framework/hooks/usePagination'
 	import Create from './Create.vue'
 	import Edit from './Edit.vue'
+	import ViewAuthority from './ViewAuthority.vue'
 	import dayjs from 'dayjs'
-	import { ref, onActivated, watch } from 'vue'
+	import { ref } from 'vue'
 
+	// 列表
+	const userInfoStore = useUserInfo()
 	const searchParams = ref<SearchParams>({})
-
-	const paging = ref({
-		page: 1,
-		size: 20,
-		count: 0
-	})
-
-	watch(() => paging.value.page, getTableData)
-	watch(() => paging.value.size, getTableData)
-
+	const { Pagination, paging } = usePagination({ getList: getTableData })
 	const tableData = ref<Admin[]>([])
 	async function getTableData() {
 		const { name } = searchParams.value
-		const { code, data } = await getAdminList({ name, page: paging.value.page, size: paging.value.size })
+		const { code, msg, data } = await admin.getAdminList({ name, page: paging.page, size: paging.size })
 		if (code !== 0) {
 			tableData.value = []
-			paging.value.count = 0
-			ElMessage.error('获取管理员列表失败')
+			paging.count = 0
+			ElMessage.error(msg)
 			return
 		}
-		const { count, list } = data!
+		const { count = 0, list = [] } = data ?? {}
 		list.forEach((it) => {
-			it.createTime = dayjs(it.createTime).format('YYYY/MM/DD HH:mm:ss')
-			it.updateTime = dayjs(it.updateTime).format('YYYY/MM/DD HH:mm:ss')
+			it.createTime = dayjs(it.createTime).format('YYYY-MM-DD HH:mm:ss')
+			if (it.updateTime) {
+				it.updateTime = dayjs(it.updateTime).format('YYYY-MM-DD HH:mm:ss')
+			}
 		})
 		tableData.value = list
-		paging.value.count = count
+		paging.count = count
 	}
 
-	getTableData()
-	onActivated(getTableData)
-
-	async function del(row: Admin) {
+	// 删除
+	async function del(row: unknown) {
+		const adminRow = row as Admin
 		try {
-			await ElMessageBox.confirm(`确认删除管理员 "${row.name}" ?`, '注意', {
+			await ElMessageBox.confirm(`确认删除管理员 "${adminRow.name}" ?`, '注意', {
 				confirmButtonText: '确 认',
 				cancelButtonText: '取 消',
 				type: 'warning'
@@ -96,7 +112,7 @@
 			return
 		}
 
-		const { code, msg } = await delAdmin(row.id)
+		const { code, msg } = await admin.delAdmin(adminRow.id)
 		if (code !== 0) {
 			ElMessage.error(msg)
 			return
@@ -105,17 +121,26 @@
 		ElMessage.success(msg)
 	}
 
+	// 编辑
 	const editVisible = ref(false)
 	const editData = ref({} as Admin)
-	function edit(row: Admin) {
-		editData.value = row
+	function edit(row: unknown) {
+		editData.value = row as Admin
 		editVisible.value = true
+	}
+
+	// 预览权限
+	const viewAuthorityVisible = ref(false)
+	const viewAuthorityData = ref({} as Admin)
+	function viewAuthority(row: unknown) {
+		viewAuthorityData.value = row as Admin
+		viewAuthorityVisible.value = true
 	}
 </script>
 
 <style scoped lang="scss">
 	.header,
 	.container {
-		border: 1px solid var(--el-border-color);
+		border: 1px solid var(--theme-color-border);
 	}
 </style>

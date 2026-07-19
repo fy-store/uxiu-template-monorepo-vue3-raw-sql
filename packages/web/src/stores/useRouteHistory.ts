@@ -1,15 +1,12 @@
-import type { Component } from 'vue'
-import type { RouteLocationNormalizedLoadedGeneric } from 'vue-router'
 import type { HistoryItem, PushHistoryItem } from './types'
 import { useRouter, useRoute } from 'vue-router'
-import { computed, defineComponent, h, markRaw, reactive, readonly, ref, watchEffect } from 'vue'
+import { computed, reactive, readonly, ref, watchEffect } from 'vue'
 import { defineStore } from 'pinia'
-import { project } from '@/conf'
+import { project, cacheComponent } from '@/config'
 
 export const useRouteHistory = defineStore('routeHistory', () => {
 	const router = useRouter()
 	const route = useRoute()
-	const cacheMap = ref(new Map<string, Component>())
 	const history = ref<HistoryItem[]>([])
 	/**
 	 * 监听路由变化, 但记录中不存在时是否允许插入
@@ -21,7 +18,7 @@ export const useRouteHistory = defineStore('routeHistory', () => {
 	 * 通过路由 path 判断历史列表中存不存在
 	 * @param path 路由 path
 	 */
-	const hasPath = (path: string) => {
+	function hasPath(path: string) {
 		return history.value.some((item) => item.path === path)
 	}
 
@@ -30,7 +27,7 @@ export const useRouteHistory = defineStore('routeHistory', () => {
 	 * @param item 配置项
 	 * @returns 如果已存在则插入失败 返回 false, 如果不存在则插入成功 返回 true
 	 */
-	const push = (item: PushHistoryItem) => {
+	function push(item: PushHistoryItem) {
 		if (hasPath(item.path)) {
 			return false
 		}
@@ -42,48 +39,6 @@ export const useRouteHistory = defineStore('routeHistory', () => {
 		})
 
 		return true
-	}
-
-	/**
-	 * 根据路由信息决定返回的组件是否需要包装缓存
-	 * @param component 组件
-	 */
-	const getComponent = (route: RouteLocationNormalizedLoadedGeneric, component: Component) => {
-		/**
-		 * 防止响应式刷新重新添加
-		 */
-		if (!isPushCacheMap.value) {
-			return null
-		}
-		if (!route.meta.cache) {
-			return component
-		}
-
-		let name: string
-		if (route.meta.generateName) {
-			if (typeof route.meta.generateName === 'function') {
-				name = route.meta.generateName({ router, route, component })
-			} else {
-				name = route.meta.generateName
-			}
-		} else {
-			name = route.path.slice(1).replace(/\//, '-')
-		}
-
-		const mapComponent = cacheMap.value.get(name)
-		if (mapComponent) {
-			return mapComponent
-		}
-
-		const newComponent = defineComponent({
-			name,
-			render() {
-				return h(component)
-			}
-		})
-
-		cacheMap.value.set(name, markRaw(newComponent))
-		return newComponent
 	}
 
 	/**
@@ -114,14 +69,14 @@ export const useRouteHistory = defineStore('routeHistory', () => {
 		const titleDom = document.querySelector('head title') ?? ({} as Element)
 		let title: string = ''
 		if (typeof route.meta.title === 'function') {
-			title = route.meta.title({ router, route })
+			title = route.meta.title()
 		} else if (typeof route.meta.title === 'string') {
 			title = route.meta.title
 		}
 		let pageTitle = project.name + (title ? ` - ${title}` : '')
 		if (route.meta.pageTitle) {
 			if (typeof route.meta.pageTitle === 'function') {
-				pageTitle = route.meta.pageTitle({ router, route })
+				pageTitle = route.meta.pageTitle()
 			} else {
 				pageTitle = route.meta.pageTitle
 			}
@@ -146,7 +101,7 @@ export const useRouteHistory = defineStore('routeHistory', () => {
 			isPushCacheMap.value = true
 			let title: string
 			if (typeof route.meta.title === 'function') {
-				title = route.meta.title({ router, route })
+				title = route.meta.title()
 			} else if (typeof route.meta.title === 'string') {
 				title = route.meta.title
 			} else {
@@ -158,10 +113,9 @@ export const useRouteHistory = defineStore('routeHistory', () => {
 
 	return reactive({
 		current,
-		cacheMap: readonly(cacheMap),
-		history: readonly(history),
-		getComponent,
 		hasPath,
+		history: readonly(history),
+
 		changeTitle(path: string, newTitle: string) {
 			const item = history.value.find((it) => it.path === path)
 			if (item) {
@@ -170,19 +124,22 @@ export const useRouteHistory = defineStore('routeHistory', () => {
 				titleDom.textContent = project.name + (newTitle ? ` - ${newTitle}` : '')
 			}
 		},
+
 		removeByIndex(i: number) {
 			const currentItem = history.value[i]
 			const previousItem = history.value[i - 1]
 			const nextItem = history.value[i + 1]
 
 			// 移除指定项
-			const removeItem = history.value.splice(i, 1)
+			const removeItems = history.value.splice(i, 1)
+			if (!removeItems) return
 			// 生成对应名字, 从缓存中移除
-			const name = removeItem[0].path.slice(1).replace(/\//, '-')
-			cacheMap.value.delete(name)
+			const name = cacheComponent.getName(removeItems.at(0)!.path)
+			cacheComponent.cache.delete(name)
+
 			if (!previousItem) {
 				if (nextItem) {
-					if (currentItem.active) {
+					if (currentItem?.active) {
 						isPushHistory.value = false
 						isPushCacheMap.value = false
 						if (router.currentRoute.value.path === nextItem.path) return
@@ -195,7 +152,7 @@ export const useRouteHistory = defineStore('routeHistory', () => {
 				router.push('/')
 				return
 			}
-			if (currentItem.active) {
+			if (currentItem?.active) {
 				isPushHistory.value = false
 				isPushCacheMap.value = false
 				if (router.currentRoute.value.path === previousItem.path) return
@@ -212,21 +169,21 @@ export const useRouteHistory = defineStore('routeHistory', () => {
 			} else {
 				history.value.splice(0)
 			}
-			cacheMap.value.clear()
+			cacheComponent.cache.clear()
 		},
 
 		closeOther() {
-			const name: string = route.path.slice(1).replace(/\//, '-')
-			const cache = cacheMap.value.get(name)
-			cacheMap.value.clear()
+			const name: string = cacheComponent.getName(route.path)
+			const cache = cacheComponent.cache.get(name)
+			cacheComponent.cache.clear()
 			if (cache) {
-				cacheMap.value.set(name, cache)
+				cacheComponent.cache.set(name, cache)
 			}
 
 			history.value.splice(0)
 			let title: string
 			if (typeof route.meta.title === 'function') {
-				title = route.meta.title({ router, route })
+				title = route.meta.title()
 			} else if (typeof route.meta.title === 'string') {
 				title = route.meta.title
 			} else {

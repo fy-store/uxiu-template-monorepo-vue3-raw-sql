@@ -1,27 +1,24 @@
-import type { UserInfo } from './types'
-import { reactive, readonly } from 'vue'
+import type { MyInfo } from '@server/index'
+import { reactive, ref, readonly } from 'vue'
 import { defineStore } from 'pinia'
-import { getMyInfo } from '@/api'
-import type { MyInfo } from '@t/account'
-
-const getUserInfo = (): UserInfo => {
-	const userInfoJSON = localStorage.getItem('userInfo')
-	return reactive(userInfoJSON ? JSON.parse(userInfoJSON) : {})
-}
+import { account } from '@/api'
 
 export const useUserInfo = defineStore('userInfo', () => {
-	const userInfo = reactive({} as MyInfo)
-	getMyInfo().then((res) => {
+	const userInfo = ref({} as MyInfo)
+	account.getMyInfo().then((res) => {
 		const { data = {} } = res
-		Object.assign(userInfo, data)
+		Object.assign(userInfo.value, data)
 	})
 
 	const result = reactive({
 		info: readonly(userInfo),
 		async refresh() {
-			const { data = {} } = await getMyInfo()
-			Object.assign(userInfo, data)
-			return readonly(userInfo)
+			const { data = {} } = await account.getMyInfo()
+			Object.keys(userInfo.value).forEach((key) => {
+				delete userInfo.value[key as keyof MyInfo]
+			})
+			Object.assign(userInfo.value, data)
+			return userInfo
 		}
 	})
 

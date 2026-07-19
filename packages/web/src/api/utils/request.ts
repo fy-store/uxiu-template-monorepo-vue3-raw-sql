@@ -1,6 +1,6 @@
 import router from '@/router'
 import axios from 'axios'
-import { legacyPersistenceKeys, persistenceKeys, project } from '@/config'
+import { persistenceKeys, project } from '@/config'
 
 export const request = axios.create({
 	baseURL: project.apiURL,
@@ -9,7 +9,7 @@ export const request = axios.create({
 })
 
 request.interceptors.request.use((req) => {
-	const token = localStorage.getItem(persistenceKeys.token) ?? localStorage.getItem(legacyPersistenceKeys.token) ?? ''
+	const token = localStorage.getItem(persistenceKeys.token) ?? ''
 	req.headers.Authorization = `bearer ${token}`
 	return req
 })
