@@ -1,8 +1,8 @@
 {
   "type": "module",
-  "name": "file-store",
+  "name": "uxiu-template-monorepo-vue3-raw-sql",
   "version": "1.0.0",
-  "description": "文件管理系统",
+  "description": "Vue 3 + Koa 3 管理系统模板",
   "scripts": {
     "build": "pnpm -r build && tsx ./scripts/moveDist.ts",
     "dev": "pnpm -r dev",
