@@ -1,35 +1,56 @@
 import router from '@/router'
 import axios from 'axios'
+import { legacyPersistenceKeys, persistenceKeys, project } from '@/config'
 
 export const request = axios.create({
-	baseURL: import.meta.env.MODE === 'development' ? 'http://127.0.0.1:3323/api/' : 'http://8.138.99.26/api/',
-	timeout: 6000
+	baseURL: project.apiURL,
+	timeout: 1000 * 60 * 2,
+	withCredentials: true
 })
 
 request.interceptors.request.use((req) => {
-	req.headers.Authorization = `bearer ${localStorage.getItem('token') ?? ''}`
+	const token = localStorage.getItem(persistenceKeys.token) ?? localStorage.getItem(legacyPersistenceKeys.token) ?? ''
+	req.headers.Authorization = `bearer ${token}`
 	return req
 })
 
 request.interceptors.response.use(
 	(res) => {
-		const { code } = res.data
-		if (code === -1) {
-			router.push('/login')
+		if (res.status >= 200 && res.status < 300) {
+			if (res.data?.code === -1) {
+				router.push('/login')
+			}
+			return res.data
 		}
-		return res.data
+		return {
+			code: res.data?.code ?? 1,
+			msg: res.data?.msg ?? `请求错误, status: ${res.status}`,
+			tip: '此信息来自响应拦截器包装, code 和 msg 为拦截器自定义, 不代表真实错误, 具体错误请查看开发者工具'
+		}
 	},
 	(error) => {
-		let msg = '请求失败, 请重试 !'
-		if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
-			msg = '网络连接失败，请检查您的网络！'
-		}
 		const info = {
 			code: 1,
-			msg,
+			msg: `未知错误, code: ${error.code}, message: ${error.message}, status: ${error?.response?.status ?? '无'}`,
 			error,
-			tip: '此信息来自响应拦截器, 具体错误信息应查看开发者工具'
+			tip: '此信息来自请求拦截器包装, code 和 msg 为拦截器自定义, 不代表真实错误, 具体错误请查看开发者工具'
 		}
+		if (error?.response?.status === 404) {
+			info.msg = `资源不存在, status: 404`
+		} else if (error?.response?.status === 403) {
+			info.msg = `${error?.response?.data?.msg ?? '无权限'}, status: 403`
+		} else if (error?.response?.status >= 400 && error?.response?.status < 500) {
+			info.msg = `${error?.response?.data?.msg ?? '客户端错误'}, status: ${
+				error?.response?.status ?? '>= 400 && < 500'
+			}`
+		} else if (error?.response?.status >= 500) {
+			info.msg = `${error?.response?.data?.msg ?? '服务器异常'}, status: ${error?.response?.status ?? '>= 500'}`
+		} else if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
+			info.msg = `网络或cors错误, code: ${error.code}, message: ${error.message}, status: ${
+				error?.response?.status ?? '无'
+			}`
+		}
+
 		console.error(info)
 		return info
 	}
