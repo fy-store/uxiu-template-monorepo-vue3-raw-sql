@@ -15,6 +15,8 @@ description: 在 uxiu-template monorepo 模板中创建、修改或复用 packag
 4. 后端共享但依赖 `sys`、数据库或项目配置：放入 `packages/server/src/common`。
 5. 浏览器与 Node 都需要：在 `packages/common/src/<module>` 创建或扩展模块。
 
+安装依赖必须使用 pnpm。遇到网络、超时或 registry 连接错误时，解除仓库根 `.npmrc` 中 `registry=https://registry.npmmirror.com` 的注释后重试；没有网络问题时保持注释，不自行添加其他镜像。
+
 ## 实现要求
 
 - 模块使用目录结构，`index.ts` 为入口，复杂类型放入 `types.ts`。

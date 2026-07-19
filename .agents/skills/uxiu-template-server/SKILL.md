@@ -19,6 +19,8 @@ description: 在 uxiu-template monorepo 模板中开发或修改 Node.js/Koa 后
 8. 修改路由后同时检查路由栈，并向当前监听端口发出真实 HTTP 请求；记录方法、最终 URL、状态码和响应体，区分代码问题、旧进程和前端配置问题。
 9. 运行目标包可用的构建或类型检查，区分本次错误和仓库既有错误。
 
+安装依赖必须使用 pnpm。遇到网络、超时或 registry 连接错误时，解除仓库根 `.npmrc` 中 `registry=https://registry.npmmirror.com` 的注释后重试；没有网络问题时保持注释，不自行添加其他镜像。
+
 ## 模块边界
 
 - `src/utils`：不依赖系统配置和项目配置的后端工具。

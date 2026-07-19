@@ -23,6 +23,8 @@ description: 在 uxiu-template monorepo 模板中开发或修改 Vue 3 前端功
 7. 排查请求错误时记录 Axios 的 `baseURL`、相对路径、HTTP 方法和浏览器最终 URL，并用同样的请求验证当前后端进程；不要只根据封装后的错误消息判断路由状态。
 8. 运行最窄验证，再运行 `pnpm --dir packages/web build-only`。类型检查失败时区分本次诊断和仓库既有诊断。
 
+安装依赖必须使用 pnpm。遇到网络、超时或 registry 连接错误时，解除仓库根 `.npmrc` 中 `registry=https://registry.npmmirror.com` 的注释后重试；没有网络问题时保持注释，不自行添加其他镜像。
+
 ## 编码要求
 
 - 使用 TypeScript、ESModule、`async/await`、无分号风格和 tab 缩进。
