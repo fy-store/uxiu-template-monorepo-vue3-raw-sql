@@ -6,10 +6,10 @@
   "main": "./src/index.ts",
   "scripts": {
     "start": "tsx ./src/index.ts",
+    "start:dist": "cd ./dist && node --run start",
+    "build": "uxiu-cli build",
     "dev": "cross-env NODE_ENV=development tsx watch ./src/index.ts",
     "debug": "cross-env NODE_ENV=development tsx watch --inspect-brk ./src/index.ts",
-    "build": "uxiu-cli build",
-    "start:dist": "cd ./dist && node --run start",
     "key": "cross-env NODE_ENV=development tsx ./scripts/key.ts",
     "key:pair": "cross-env NODE_ENV=development tsx ./scripts/keyPair.ts",
     "init:root": "cross-env NODE_ENV=development tsx ./scripts/initRoot.ts",
@@ -21,7 +21,6 @@
     "@koa/multer": "^4.0.0",
     "@koa/router": "^15.7.0",
     "@koa/send": "^6.0.0",
-    "ali-oss": "^6.23.0",
     "bcrypt": "^6.0.0",
     "json5": "^2.2.3",
     "koa": "^3.2.1",
@@ -33,7 +32,6 @@
     "xss": "^1.0.15"
   },
   "devDependencies": {
-    "@types/ali-oss": "^6.23.3",
     "@types/bcrypt": "^6.0.0",
     "@types/koa": "^3.0.3",
     "@types/koa-bodyparser": "^4.3.13",

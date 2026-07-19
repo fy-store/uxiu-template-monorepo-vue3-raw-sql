@@ -57,6 +57,7 @@ createApp({
 		ctx.app.use(verifyIdentityPermission())
 		const { router } = await import('./api')
 		ctx.app.use(router.routes())
+		ctx.app.use(router.allowedMethods())
 		ctx.app.use(staticFile({ publicPath: sys.config.common.fileStorage.storagePath }))
 		ctx.app.use(notFound())
 	},

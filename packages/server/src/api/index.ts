@@ -13,9 +13,11 @@ export type * from './v1/file'
 export type * from './v1/debug'
 export type * from './v1/authority'
 
-export const router = new Router() 
+export const router = new Router({
+	prefix: path.join(sys.config.apiPath, 'v1')
+})
+
 router.use(
-	path.join(sys.config.apiPath, 'v1').replaceAll('\\', '/'),
 	accountRouter.routes(),
 	adminRouter.routes(),
 	fileRouter.routes(),
