@@ -1,4 +1,4 @@
-import type { InspectorMethod } from 'uxiu'
+import type { RequestInspectorMethod } from 'uxiu'
 import { z } from 'zod'
 import { loginParamsSchema } from './schema'
 
@@ -14,7 +14,7 @@ export interface AuthorityItem {
 	/** 路由 */
 	path: string
 	/** 方法 */
-	methods: InspectorMethod | InspectorMethod[] | '*'
+	methods: RequestInspectorMethod | RequestInspectorMethod[] | '*'
 }
 
 /** 当前账号信息 */
