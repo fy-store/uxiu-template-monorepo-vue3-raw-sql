@@ -2,12 +2,12 @@
 
 ## 项目概述
 
-这是一个使用 pnpm 管理的 TypeScript monorepo，要求 Node.js `>= 24`。
+这是一个使用 pnpm 管理的 TypeScript monorepo，要求 Node.js `>= 24`, MySQL `>= 8.0`, 启动请参考 `README.md` 中的启动和部署须知。
 
-| 路径 | 职责 |
-| --- | --- |
-| `packages/web` | Vue 3 Web 前端 |
-| `packages/server` | Koa 3 服务端 |
+| 路径              | 职责                       |
+| ----------------- | -------------------------- |
+| `packages/web`    | Vue 3 Web 前端             |
+| `packages/server` | Koa 3 服务端               |
 | `packages/common` | 前后端通用 TypeScript 模块 |
 
 ## 项目 Skills
