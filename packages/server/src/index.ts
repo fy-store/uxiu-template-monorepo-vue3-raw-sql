@@ -7,6 +7,7 @@ import { bodyParser } from '@koa/bodyparser'
 import cors from '@koa/cors'
 import { styleText } from 'node:util'
 import { sys } from '@server/config'
+import { fileStorage } from '@server/common'
 import {
 	errorHandler,
 	preventInjection,
@@ -54,11 +55,10 @@ createApp({
 		)
 		ctx.app.use(accessLog())
 		ctx.app.use(identitySession())
+		ctx.app.use(staticFile({ publicPath: fileStorage.pathJoin(sys.config.common.fileStorage.storagePath, 'public'), startPath: '/public' }))
 		ctx.app.use(verifyIdentityPermission())
 		const { router } = await import('./api')
 		ctx.app.use(router.routes())
-		ctx.app.use(router.allowedMethods())
-		ctx.app.use(staticFile({ publicPath: sys.config.common.fileStorage.storagePath }))
 		ctx.app.use(notFound())
 	},
 	async mounted(ctx) {
