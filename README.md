@@ -6,7 +6,7 @@
 
 3. 在 `packages\server\sys.config.ts` 中 `mysql` 字段中配置数据库连接信息.
 
-4. 使用 `pnpm dev:server` 启动后端服务. 使用 `pnpm dev:web` 启动前端服务. `pnpm dev` 启动所有服务, 某些环境无法正常启动(不推荐).
+4. 使用 `pnpm dev:server` 启动后端服务. 使用 `pnpm dev:web` 启动前端服务. `pnpm dev` 启动所有服务.
 
 5. 使用 `pnpm init:db` 初始化数据库.
 
