@@ -35,7 +35,7 @@ adminRouter.use(createAdminRouter.routes(), getAdminListRouter.routes())
 1. `schema.ts` 定义输入校验，`types.ts` 通过 `z.infer` 导出参数类型。
 2. 处理器只负责校验、权限前置条件、流程编排和响应；数据访问进入对应 `DbXxx`。
 3. 处理器导出局部 Router，模块 `index.ts` 使用各子路由的 `routes()` 聚合，并导出前端需要的类型。
-4. `src/api/index.ts` 在顶层 Router 统一设置 v1 前缀并聚合业务路由；`packages/server/src/index.ts` 挂载 `routes()` 后紧接 `allowedMethods()`，同时保持公开类型导出链完整。
+4. `src/api/index.ts` 在顶层 Router 统一设置 v1 前缀并聚合业务路由；`packages/server/src/index.ts` 挂载 `routes()` 后紧接 `routes()`，同时保持公开类型导出链完整。
 5. `src/config/authority/index.ts` 登记每条受保护路由；方法和路径必须与处理器 Router 的方法、顶层 v1 前缀完全一致。
 6. 同一前端操作调用准备、上传、合并等多个接口时，每个接口都需要独立权限规则。
 7. 修改已有权限的方法或路径时保持权限 ID 稳定，并确认已存储规则会在登录时按 ID 映射到当前配置；新增权限仍由管理员显式授予。
