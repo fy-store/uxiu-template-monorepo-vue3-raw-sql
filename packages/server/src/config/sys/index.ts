@@ -1,6 +1,5 @@
 import config from '../../../sys.config'
 import type { Sys } from './types'
-import Router from '@koa/router'
 import { getLocalIP } from 'uxiu'
 import { readonly } from 'uxiu'
 import json5 from 'json5'

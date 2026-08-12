@@ -24,7 +24,6 @@
     "bcrypt": "^6.0.0",
     "json5": "^2.2.3",
     "koa": "^3.2.1",
-    "log4js": "^6.9.1",
     "multer": "^2.2.0",
     "mysql2": "^3.23.0",
     "path-to-regexp": "^8.4.2",
@@ -40,7 +39,7 @@
     "@types/koa__multer": "^2.0.8",
     "cross-env": "^10.1.0",
     "prettier": "^3.9.5",
-    "typescript": "7.0.2",
-    "uxiu-cli": "0.9.3"
+    "typescript": "^7.0.2",
+    "uxiu-cli": "0.10.3"
   }
 }

@@ -55,7 +55,12 @@ createApp({
 		)
 		ctx.app.use(accessLog())
 		ctx.app.use(identitySession())
-		ctx.app.use(staticFile({ publicPath: fileStorage.pathJoin(sys.config.common.fileStorage.storagePath, 'public'), startPath: '/public' }))
+		ctx.app.use(
+			staticFile({
+				publicPath: fileStorage.pathJoin(sys.config.common.fileStorage.storagePath, 'public'),
+				startPath: '/public'
+			})
+		)
 		ctx.app.use(verifyIdentityPermission())
 		const { router } = await import('./api')
 		ctx.app.use(router.routes())
