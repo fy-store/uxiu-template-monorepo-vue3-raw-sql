@@ -68,8 +68,8 @@ createApp({
 	},
 	async mounted(ctx) {
 		console.log('')
-		console.log(styleText('green', `服务启动成功 ➜  Local: http://127.0.0.1:${ctx.port}/`))
-		console.log(styleText('green', `服务启动成功 ➜  Network: http://${primaryIP}:${ctx.port}/`))
+		console.log(styleText('green', `后端服务启动成功 ➜  Local: http://127.0.0.1:${ctx.port}/`))
+		console.log(styleText('green', `后端服务启动成功 ➜  Network: http://${primaryIP}:${ctx.port}/`))
 		console.log('')
 	}
 })
