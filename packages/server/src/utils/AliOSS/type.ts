@@ -10,8 +10,8 @@ export interface AliOSSOptions {
 	region: string
 }
 
-/** 生成受约束的 OSS PUT 上传签名 URL 时使用的参数。 */
-export interface AliOSSUploadSignatureUrlOptions {
+/** 生成指定 OSS 文件签名 URL 时使用的通用参数。 */
+export interface AliOSSFileSignatureUrlOptions {
 	/**
 	 * 签名 URL 的有效时长，单位为秒。
 	 *
@@ -32,6 +32,13 @@ export interface AliOSSUploadSignatureUrlOptions {
 	 * OSS 使用 Object Name 前缀模拟目录，此值不会包含 Bucket 名称。
 	 */
 	uploadPath?: string
+}
+
+/** 生成指定 OSS 文件访问签名 URL 时使用的参数。 */
+export type AliOSSAccessSignatureUrlOptions = AliOSSFileSignatureUrlOptions
+
+/** 生成受约束的 OSS PUT 上传签名 URL 时使用的参数。 */
+export interface AliOSSUploadSignatureUrlOptions extends AliOSSFileSignatureUrlOptions {
 	/**
 	 * 待上传文件的实际大小，单位为字节。
 	 *

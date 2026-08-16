@@ -1,4 +1,9 @@
-import type { AliOSSOptions, AliOSSUploadSignatureUrlOptions } from './type'
+import type {
+	AliOSSOptions,
+	AliOSSFileSignatureUrlOptions,
+	AliOSSAccessSignatureUrlOptions,
+	AliOSSUploadSignatureUrlOptions
+} from './type'
 import OSS from 'ali-oss'
 export type * from './type'
 
@@ -15,6 +20,50 @@ const INVALID_OBJECT_NAME_CHARACTER_REGEXP = /[\u0000-\u001f\u007f]/
  */
 export class AliOSS {
 	private client: OSS
+	private resolveSignatureTarget(options: AliOSSFileSignatureUrlOptions) {
+		if (!options || typeof options !== 'object') {
+			throw new TypeError('AliOSS signature options must be an object')
+		}
+
+		const { filename, uploadPath = '', expires = DEFAULT_UPLOAD_SIGNATURE_EXPIRES } = options
+
+		if (typeof filename !== 'string' || filename.trim().length === 0) {
+			throw new TypeError('filename must be a non-empty string')
+		}
+		if (
+			filename === '.' ||
+			filename === '..' ||
+			filename.includes('/') ||
+			filename.includes('\\') ||
+			INVALID_OBJECT_NAME_CHARACTER_REGEXP.test(filename)
+		) {
+			throw new Error('filename contains an invalid character or path segment')
+		}
+
+		if (typeof uploadPath !== 'string') {
+			throw new TypeError('uploadPath must be a string')
+		}
+		if (
+			uploadPath.startsWith('/') ||
+			uploadPath.endsWith('/') ||
+			uploadPath.includes('\\') ||
+			INVALID_OBJECT_NAME_CHARACTER_REGEXP.test(uploadPath) ||
+			uploadPath.split('/').some((segment) => segment.length === 0 || segment === '.' || segment === '..')
+		) {
+			throw new Error('uploadPath must be a relative OSS path without empty, current, or parent segments')
+		}
+
+		if (!Number.isInteger(expires) || expires < 1 || expires > MAX_UPLOAD_SIGNATURE_EXPIRES) {
+			throw new RangeError(`expires must be an integer between 1 and ${MAX_UPLOAD_SIGNATURE_EXPIRES} seconds`)
+		}
+
+		const objectName = uploadPath ? `${uploadPath}/${filename}` : filename
+		if (Buffer.byteLength(objectName, 'utf8') > MAX_OBJECT_NAME_BYTE_LENGTH) {
+			throw new RangeError(`OSS object name must not exceed ${MAX_OBJECT_NAME_BYTE_LENGTH} UTF-8 bytes`)
+		}
+
+		return { expires, objectName }
+	}
 
 	/**
 	 * 创建一个绑定到指定 Region 和 Bucket 的 OSS 客户端。
@@ -67,52 +116,44 @@ export class AliOSS {
 	 * ```
 	 */
 	generateUploadSignatureUrl(options: AliOSSUploadSignatureUrlOptions) {
-		if (!options || typeof options !== 'object') {
-			throw new TypeError('AliOSS upload signature options must be an object')
-		}
-
-		const { filename, uploadPath = '', fileSize, expires = DEFAULT_UPLOAD_SIGNATURE_EXPIRES } = options
-
-		if (typeof filename !== 'string' || filename.trim().length === 0) {
-			throw new TypeError('filename must be a non-empty string')
-		}
-		if (
-			filename === '.' ||
-			filename === '..' ||
-			filename.includes('/') ||
-			filename.includes('\\') ||
-			INVALID_OBJECT_NAME_CHARACTER_REGEXP.test(filename)
-		) {
-			throw new Error('filename contains an invalid character or path segment')
-		}
-
-		if (typeof uploadPath !== 'string') {
-			throw new TypeError('uploadPath must be a string')
-		}
-		if (
-			uploadPath.startsWith('/') ||
-			uploadPath.endsWith('/') ||
-			uploadPath.includes('\\') ||
-			INVALID_OBJECT_NAME_CHARACTER_REGEXP.test(uploadPath) ||
-			uploadPath.split('/').some((segment) => segment.length === 0 || segment === '.' || segment === '..')
-		) {
-			throw new Error('uploadPath must be a relative OSS path without empty, current, or parent segments')
-		}
+		const { expires, objectName } = this.resolveSignatureTarget(options)
+		const { fileSize } = options
 
 		if (!Number.isSafeInteger(fileSize) || fileSize < 0 || fileSize > MAX_PUT_OBJECT_SIZE) {
 			throw new RangeError(`fileSize must be an integer between 0 and ${MAX_PUT_OBJECT_SIZE} bytes`)
-		}
-		if (!Number.isInteger(expires) || expires < 1 || expires > MAX_UPLOAD_SIGNATURE_EXPIRES) {
-			throw new RangeError(`expires must be an integer between 1 and ${MAX_UPLOAD_SIGNATURE_EXPIRES} seconds`)
-		}
-
-		const objectName = uploadPath ? `${uploadPath}/${filename}` : filename
-		if (Buffer.byteLength(objectName, 'utf8') > MAX_OBJECT_NAME_BYTE_LENGTH) {
-			throw new RangeError(`OSS object name must not exceed ${MAX_OBJECT_NAME_BYTE_LENGTH} UTF-8 bytes`)
 		}
 
 		return this.client.signatureUrlV4('PUT', expires, { headers: { 'Content-Length': fileSize } }, objectName, [
 			'content-length'
 		])
+	}
+
+	/**
+	 * 生成指定文件的 V4 预签名 GET 访问 URL。
+	 *
+	 * 最终 Object Name 为 `uploadPath/filename`；未提供 `uploadPath` 时直接使用 `filename`。
+	 * URL 只能访问签名绑定的这个 Object Name，修改文件名、目录或签名参数后 OSS 将拒绝请求。
+	 *
+	 * 此方法只在本地计算签名，不会请求 OSS，也不会检查指定文件是否存在。预签名 URL 属于临时访问凭证，
+	 * 任何持有者在过期前都可以读取目标文件，因此调用方应使用尽可能短的有效期并限制 URL 的传播范围。
+	 *
+	 * @param options 文件名、文件所在目录和签名有效期。
+	 * @returns 可直接用于 HTTP GET 请求、浏览器地址或资源 `src` 属性的 V4 预签名 URL。
+	 * @throws {TypeError} 参数类型错误，或文件名为空。
+	 * @throws {RangeError} 有效期或完整 Object Name 长度超出 OSS 支持范围。
+	 * @throws {Error} 文件名或文件目录包含非法路径内容。
+	 *
+	 * @example
+	 * ```ts
+	 * const url = await aliOSS.generateAccessSignatureUrl({
+	 *   filename: 'avatar.png',
+	 *   uploadPath: `users/${userId}`,
+	 *   expires: 300
+	 * })
+	 * ```
+	 */
+	generateAccessSignatureUrl(options: AliOSSAccessSignatureUrlOptions) {
+		const { expires, objectName } = this.resolveSignatureTarget(options)
+		return this.client.signatureUrlV4('GET', expires, {}, objectName)
 	}
 }
