@@ -17,6 +17,9 @@ importers:
       '@ffmpeg/util':
         specifier: ^0.12.2
         version: 0.12.2
+      ali-oss:
+        specifier: ^6.23.0
+        version: 6.23.0
       axios:
         specifier: ^1.18.1
         version: 1.18.1
@@ -42,6 +45,9 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@types/ali-oss':
+        specifier: ^6.23.3
+        version: 6.23.3
       '@types/node':
         specifier: ^26.1.1
         version: 26.1.1
@@ -139,9 +145,6 @@ importers:
       '@koa/send':
         specifier: ^6.0.0
         version: 6.0.0
-      ali-oss:
-        specifier: ^6.23.0
-        version: 6.23.0
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0
@@ -167,9 +170,6 @@ importers:
         specifier: ^1.0.15
         version: 1.0.15
     devDependencies:
-      '@types/ali-oss':
-        specifier: ^6.23.3
-        version: 6.23.3
       '@types/bcrypt':
         specifier: ^6.0.0
         version: 6.0.0
