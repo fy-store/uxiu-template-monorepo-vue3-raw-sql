@@ -2,7 +2,8 @@ import type {
 	AliOSSOptions,
 	AliOSSFileSignatureUrlOptions,
 	AliOSSAccessSignatureUrlOptions,
-	AliOSSUploadSignatureUrlOptions
+	AliOSSUploadSignatureUrlOptions,
+	AliOSSResponseHeaders
 } from './type'
 import OSS from 'ali-oss'
 export type * from './type'
@@ -12,20 +13,82 @@ const MAX_UPLOAD_SIGNATURE_EXPIRES = 7 * 24 * 60 * 60
 const MAX_PUT_OBJECT_SIZE = 5 * 1024 ** 3
 const MAX_OBJECT_NAME_BYTE_LENGTH = 1023
 const INVALID_OBJECT_NAME_CHARACTER_REGEXP = /[\u0000-\u001f\u007f]/
+const HTTP_HEADER_NAME_REGEXP = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/
+const INVALID_HTTP_HEADER_VALUE_REGEXP = /[\r\n]/
+const RESPONSE_HEADER_QUERY_MAP = {
+	'cache-control': 'response-cache-control',
+	'content-disposition': 'response-content-disposition',
+	'content-encoding': 'response-content-encoding',
+	'content-language': 'response-content-language',
+	expires: 'response-expires'
+} as const
 
 /**
  * 服务端阿里云 OSS 工具。
  *
  * 客户端内部使用 V4 签名；AccessKey 不会暴露给取得预签名 URL 的上传方。
+ *
+ * 文档: https://help.aliyun.com/zh/oss/user-guide/upload-files-using-presigned-urls
  */
 export class AliOSS {
 	private client: OSS
+
+	private resolveHeaders(headers: unknown, optionName: string) {
+		if (headers === undefined) return {}
+		if (!(typeof headers === 'object' && headers !== null && !Array.isArray(headers))) {
+			throw new TypeError(`${optionName} must be an object`)
+		}
+
+		const resolvedHeaders: Record<string, string> = {}
+		const lowercaseHeaderNames = new Set<string>()
+		for (const [name, value] of Object.entries(headers)) {
+			if (!HTTP_HEADER_NAME_REGEXP.test(name)) {
+				throw new TypeError(`${optionName} contains an invalid HTTP header name: ${name}`)
+			}
+			if (value === undefined) continue
+			if (typeof value !== 'string') {
+				throw new TypeError(`${optionName}.${name} must be a string`)
+			}
+			if (INVALID_HTTP_HEADER_VALUE_REGEXP.test(value)) {
+				throw new TypeError(`${optionName}.${name} must not contain CR or LF characters`)
+			}
+
+			const lowercaseName = name.toLowerCase()
+			if (lowercaseHeaderNames.has(lowercaseName)) {
+				throw new TypeError(`${optionName} contains duplicate HTTP header names: ${name}`)
+			}
+			lowercaseHeaderNames.add(lowercaseName)
+			resolvedHeaders[name] = value
+		}
+
+		return resolvedHeaders
+	}
+
+	private resolveResponseHeaderQueries(responseHeaders: AliOSSResponseHeaders | undefined) {
+		const headers = this.resolveHeaders(responseHeaders, 'responseHeaders')
+		const queries: Record<string, string> = {}
+		for (const [name, value] of Object.entries(headers)) {
+			const queryName = RESPONSE_HEADER_QUERY_MAP[name.toLowerCase() as keyof typeof RESPONSE_HEADER_QUERY_MAP]
+			if (!queryName) {
+				throw new TypeError(`responseHeaders does not support overriding ${name}`)
+			}
+			queries[queryName] = value
+		}
+		return queries
+	}
+
 	private resolveSignatureTarget(options: AliOSSFileSignatureUrlOptions) {
 		if (!options || typeof options !== 'object') {
 			throw new TypeError('AliOSS signature options must be an object')
 		}
 
-		const { filename, uploadPath = '', expires = DEFAULT_UPLOAD_SIGNATURE_EXPIRES } = options
+		const {
+			filename,
+			uploadPath = '',
+			expires = DEFAULT_UPLOAD_SIGNATURE_EXPIRES,
+			config = {},
+			additionalHeaders = []
+		} = options
 
 		if (typeof filename !== 'string' || filename.trim().length === 0) {
 			throw new TypeError('filename must be a non-empty string')
@@ -44,11 +107,12 @@ export class AliOSS {
 			throw new TypeError('uploadPath must be a string')
 		}
 		if (
-			uploadPath.startsWith('/') ||
-			uploadPath.endsWith('/') ||
-			uploadPath.includes('\\') ||
-			INVALID_OBJECT_NAME_CHARACTER_REGEXP.test(uploadPath) ||
-			uploadPath.split('/').some((segment) => segment.length === 0 || segment === '.' || segment === '..')
+			uploadPath !== '' &&
+			(uploadPath.startsWith('/') ||
+				uploadPath.endsWith('/') ||
+				uploadPath.includes('\\') ||
+				INVALID_OBJECT_NAME_CHARACTER_REGEXP.test(uploadPath) ||
+				uploadPath.split('/').some((segment) => segment.length === 0 || segment === '.' || segment === '..'))
 		) {
 			throw new Error('uploadPath must be a relative OSS path without empty, current, or parent segments')
 		}
@@ -62,7 +126,42 @@ export class AliOSS {
 			throw new RangeError(`OSS object name must not exceed ${MAX_OBJECT_NAME_BYTE_LENGTH} UTF-8 bytes`)
 		}
 
-		return { expires, objectName }
+		if (!(typeof config === 'object' && config !== null && !Array.isArray(config))) {
+			throw new TypeError('config must be an object')
+		}
+
+		if (!Array.isArray(additionalHeaders)) {
+			throw new TypeError('additionalHeaders must be an array of strings')
+		}
+
+		const configHeaders = this.resolveHeaders(config.headers, 'config.headers')
+		if (!(
+			config.queries === undefined ||
+			(typeof config.queries === 'object' && config.queries !== null && !Array.isArray(config.queries))
+		)) {
+			throw new TypeError('config.queries must be an object')
+		}
+		const configQueries: Record<string, string> = {}
+		for (const [name, value] of Object.entries(config.queries ?? {})) {
+			if (typeof value !== 'string') {
+				throw new TypeError(`config.queries.${name} must be a string`)
+			}
+			configQueries[name] = value
+		}
+
+		for (const header of additionalHeaders) {
+			if (typeof header !== 'string' || !HTTP_HEADER_NAME_REGEXP.test(header)) {
+				throw new TypeError('additionalHeaders must contain valid HTTP header names')
+			}
+		}
+
+		return {
+			expires,
+			objectName,
+			configHeaders,
+			configQueries,
+			additionalHeaders
+		}
 	}
 
 	/**
@@ -106,25 +205,52 @@ export class AliOSS {
 	 *   filename: file.name,
 	 *   uploadPath: `users/${userId}`,
 	 *   fileSize: file.size,
-	 *   expires: 300
+	 *   expires: 300,
+	 *   headers: {
+	 *     'Content-Type': file.type,
+	 *     'Cache-Control': 'private, no-cache',
+	 *     'x-oss-forbid-overwrite': 'true'
+	 *   }
 	 * })
 	 *
 	 * await fetch(url, {
 	 *   method: 'PUT',
+	 *   headers: {
+	 *     'Content-Type': file.type,
+	 *     'Cache-Control': 'private, no-cache',
+	 *     'x-oss-forbid-overwrite': 'true'
+	 *   },
 	 *   body: file
 	 * })
 	 * ```
 	 */
 	generateUploadSignatureUrl(options: AliOSSUploadSignatureUrlOptions) {
-		const { expires, objectName } = this.resolveSignatureTarget(options)
+		const { expires, objectName, configHeaders, configQueries, additionalHeaders } =
+			this.resolveSignatureTarget(options)
 		const { fileSize } = options
 
 		if (!Number.isSafeInteger(fileSize) || fileSize < 0 || fileSize > MAX_PUT_OBJECT_SIZE) {
 			throw new RangeError(`fileSize must be an integer between 0 and ${MAX_PUT_OBJECT_SIZE} bytes`)
 		}
 
-		return this.client.signatureUrlV4('PUT', expires, { headers: { 'Content-Length': fileSize } }, objectName, [
-			'content-length'
+		const uploadHeaders = this.resolveHeaders(options.headers, 'headers')
+		if (Object.keys(uploadHeaders).some((name) => name.toLowerCase() === 'content-length')) {
+			throw new TypeError('headers.Content-Length is managed by fileSize and must not be set manually')
+		}
+		if (Object.keys(configHeaders).some((name) => name.toLowerCase() === 'content-length')) {
+			throw new TypeError('config.headers.Content-Length is managed by fileSize and must not be set manually')
+		}
+
+		const headers = {
+			...uploadHeaders,
+			...configHeaders,
+			'Content-Length': fileSize
+		}
+		const signedUploadHeaders = Object.keys(uploadHeaders).map((name) => name.toLowerCase())
+		return this.client.signatureUrlV4('PUT', expires, { headers, queries: configQueries }, objectName, [
+			'content-length',
+			...signedUploadHeaders,
+			...additionalHeaders
 		])
 	}
 
@@ -148,12 +274,27 @@ export class AliOSS {
 	 * const url = await aliOSS.generateAccessSignatureUrl({
 	 *   filename: 'avatar.png',
 	 *   uploadPath: `users/${userId}`,
-	 *   expires: 300
+	 *   expires: 300,
+	 *   responseHeaders: {
+	 *     'Cache-Control': 'private, no-cache',
+	 *     'Content-Disposition': 'inline'
+	 *   }
 	 * })
 	 * ```
 	 */
 	generateAccessSignatureUrl(options: AliOSSAccessSignatureUrlOptions) {
-		const { expires, objectName } = this.resolveSignatureTarget(options)
-		return this.client.signatureUrlV4('GET', expires, {}, objectName)
+		const { expires, objectName, configHeaders, configQueries, additionalHeaders } =
+			this.resolveSignatureTarget(options)
+		const responseHeaderQueries = this.resolveResponseHeaderQueries(options.responseHeaders)
+		return this.client.signatureUrlV4(
+			'GET',
+			expires,
+			{
+				headers: configHeaders,
+				queries: { ...responseHeaderQueries, ...configQueries }
+			},
+			objectName,
+			additionalHeaders
+		)
 	}
 }

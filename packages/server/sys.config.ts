@@ -10,6 +10,7 @@ export default definedSysConfig({
 		expireInterval: 1000 * 60 * 60 * 24 * 7,
 		maxSession: 5
 	},
+	/** 正式部署请更新 */
 	cookieKeys: ['rzTdakuI'],
 	mysql: {
 		connect: {
@@ -21,16 +22,25 @@ export default definedSysConfig({
 		}
 	},
 	common: {
+		aliOSS: {
+			accessKeyId: '--------------',
+			accessKeySecret: '----------------',
+			bucket: '-----',
+			/** 示例: oss-cn-guangzhou */
+			region: '----'
+		},
 		logger: {
 			storagePath: './logs'
 		},
 		hash: {
 			salt: 10
 		},
+		/** 正式部署请更新 */
 		symmetryEncipher: {
 			iv: 'b826d1589d76e5004dbc9265c69234be',
 			key: 'caad06b6f7495df31647ad6a68e51c10dad3964a8700a5eeee198c359e5e2fda'
 		},
+		/** 正式部署请更新 */
 		asymmetricEncipher: {
 			publicKey: `
 -----BEGIN PUBLIC KEY-----
@@ -74,6 +84,7 @@ nxu+9wvIBxIHS6EQ43+uTsI=
 -----END PRIVATE KEY-----`
 		},
 
+		/** 服务器本地文件存储配置, 若使用其他存储这个配置可不需要 */
 		fileStorage: {
 			storagePath: '/storage',
 			tempPath: '/storage/temp',
@@ -119,6 +130,7 @@ nxu+9wvIBxIHS6EQ43+uTsI=
 			]
 		}
 	},
+	/** 提供给脚本用于初始化的配置 */
 	init: {
 		root: {
 			account: 'root',
