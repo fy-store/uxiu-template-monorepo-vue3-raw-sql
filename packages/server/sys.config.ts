@@ -23,11 +23,11 @@ export default definedSysConfig({
 	},
 	common: {
 		aliOSS: {
-			accessKeyId: '--------------',
-			accessKeySecret: '----------------',
-			bucket: '-----',
+			accessKeyId: '____',
+			accessKeySecret: '____',
+			bucket: '____',
 			/** 示例: oss-cn-guangzhou */
-			region: '----'
+			region: '____'
 		},
 		logger: {
 			storagePath: './logs'
