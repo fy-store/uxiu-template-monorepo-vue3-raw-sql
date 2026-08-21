@@ -142,3 +142,31 @@ export interface AliOSSUploadSignatureUrlOptions extends AliOSSFileSignatureUrlO
 	 */
 	headers?: AliOSSUploadHeaders
 }
+
+/** 初始化 OSS Multipart Upload 时使用的参数。 */
+export interface AliOSSInitMultipartUploadOptions extends AliOSSFileSignatureUrlOptions {
+	/** 完成合并后写入 Object 的请求头，例如 Content-Type。 */
+	headers?: AliOSSUploadHeaders
+}
+
+/** 为单个 Multipart Upload 分片生成预签名 URL 时使用的参数。 */
+export interface AliOSSUploadPartSignatureUrlOptions extends AliOSSUploadSignatureUrlOptions {
+	/** InitiateMultipartUpload 返回的上传 ID。 */
+	uploadId: string
+	/** OSS 分片编号，范围为 1 至 10000。 */
+	partNumber: number
+}
+
+/** OSS 已上传分片的标准化信息。 */
+export interface AliOSSMultipartPart {
+	partNumber: number
+	size: number
+	etag: string
+}
+
+/** 完成 Multipart Upload 后的标准化结果。 */
+export interface AliOSSCompleteMultipartUploadResult {
+	bucket: string
+	objectName: string
+	etag: string
+}

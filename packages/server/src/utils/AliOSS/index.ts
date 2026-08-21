@@ -3,7 +3,11 @@ import type {
 	AliOSSFileSignatureUrlOptions,
 	AliOSSAccessSignatureUrlOptions,
 	AliOSSUploadSignatureUrlOptions,
-	AliOSSResponseHeaders
+	AliOSSResponseHeaders,
+	AliOSSInitMultipartUploadOptions,
+	AliOSSUploadPartSignatureUrlOptions,
+	AliOSSMultipartPart,
+	AliOSSCompleteMultipartUploadResult
 } from './type'
 import OSS from 'ali-oss'
 export type * from './type'
@@ -11,6 +15,7 @@ export type * from './type'
 const DEFAULT_UPLOAD_SIGNATURE_EXPIRES = 3600
 const MAX_UPLOAD_SIGNATURE_EXPIRES = 7 * 24 * 60 * 60
 const MAX_PUT_OBJECT_SIZE = 5 * 1024 ** 3
+const MAX_MULTIPART_PART_NUMBER = 10000
 const MAX_OBJECT_NAME_BYTE_LENGTH = 1023
 const INVALID_OBJECT_NAME_CHARACTER_REGEXP = /[\u0000-\u001f\u007f]/
 const HTTP_HEADER_NAME_REGEXP = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/
@@ -22,6 +27,31 @@ const RESPONSE_HEADER_QUERY_MAP = {
 	'content-language': 'response-content-language',
 	expires: 'response-expires'
 } as const
+
+function normalizeMultipartParts(rawParts: unknown) {
+	const values = Array.isArray(rawParts) ? rawParts : rawParts ? [rawParts] : []
+	return values.map((rawPart, index): AliOSSMultipartPart => {
+		if (typeof rawPart !== 'object' || rawPart === null || Array.isArray(rawPart)) {
+			throw new TypeError(`OSS ListParts returned an invalid part at index ${index}`)
+		}
+
+		const part = rawPart as Record<string, unknown>
+		const partNumber = Number(part.PartNumber)
+		const size = Number(part.Size ?? part.size)
+		const etag = part.ETag
+		if (!Number.isSafeInteger(partNumber) || partNumber < 1 || partNumber > MAX_MULTIPART_PART_NUMBER) {
+			throw new TypeError(`OSS ListParts returned an invalid PartNumber at index ${index}`)
+		}
+		if (!Number.isSafeInteger(size) || size < 0) {
+			throw new TypeError(`OSS ListParts returned an invalid Size at index ${index}`)
+		}
+		if (typeof etag !== 'string' || etag.length === 0) {
+			throw new TypeError(`OSS ListParts returned an invalid ETag at index ${index}`)
+		}
+
+		return { partNumber, size, etag }
+	})
+}
 
 /**
  * 服务端阿里云 OSS 工具。
@@ -135,10 +165,12 @@ export class AliOSS {
 		}
 
 		const configHeaders = this.resolveHeaders(config.headers, 'config.headers')
-		if (!(
-			config.queries === undefined ||
-			(typeof config.queries === 'object' && config.queries !== null && !Array.isArray(config.queries))
-		)) {
+		if (
+			!(
+				config.queries === undefined ||
+				(typeof config.queries === 'object' && config.queries !== null && !Array.isArray(config.queries))
+			)
+		) {
 			throw new TypeError('config.queries must be an object')
 		}
 		const configQueries: Record<string, string> = {}
@@ -252,6 +284,140 @@ export class AliOSS {
 			...signedUploadHeaders,
 			...additionalHeaders
 		])
+	}
+
+	/**
+	 * 初始化 Multipart Upload。
+	 *
+	 * @param options OSS Object 名称、目录和最终 Object Header。
+	 * @returns UploadId 和完整 Object Name。
+	 */
+	async initMultipartUpload(options: AliOSSInitMultipartUploadOptions) {
+		const { objectName, configHeaders } = this.resolveSignatureTarget(options)
+		const uploadHeaders = this.resolveHeaders(options.headers, 'headers')
+		const result = await this.client.initMultipartUpload(objectName, {
+			headers: { ...uploadHeaders, ...configHeaders }
+		})
+		return {
+			uploadId: result.uploadId,
+			objectName: result.name
+		}
+	}
+
+	/**
+	 * 为指定 Multipart Upload 分片生成受大小约束的 V4 PUT 预签名 URL。
+	 *
+	 * @param options Object、UploadId、partNumber、分片大小及签名 Header。
+	 * @returns 可直接 PUT 对应分片二进制的预签名 URL。
+	 */
+	generateUploadPartSignatureUrl(options: AliOSSUploadPartSignatureUrlOptions) {
+		const { expires, objectName, configHeaders, configQueries, additionalHeaders } =
+			this.resolveSignatureTarget(options)
+		const { fileSize, uploadId, partNumber } = options
+
+		if (!Number.isSafeInteger(fileSize) || fileSize < 1 || fileSize > MAX_PUT_OBJECT_SIZE) {
+			throw new RangeError(`fileSize must be an integer between 1 and ${MAX_PUT_OBJECT_SIZE} bytes`)
+		}
+		if (typeof uploadId !== 'string' || uploadId.length === 0) {
+			throw new TypeError('uploadId must be a non-empty string')
+		}
+		if (!Number.isSafeInteger(partNumber) || partNumber < 1 || partNumber > MAX_MULTIPART_PART_NUMBER) {
+			throw new RangeError(`partNumber must be an integer between 1 and ${MAX_MULTIPART_PART_NUMBER}`)
+		}
+
+		const uploadHeaders = this.resolveHeaders(options.headers, 'headers')
+		if (
+			[...Object.keys(uploadHeaders), ...Object.keys(configHeaders)].some(
+				(name) => name.toLowerCase() === 'content-length'
+			)
+		) {
+			throw new TypeError('Content-Length is managed by fileSize and must not be set manually')
+		}
+
+		const headers = { ...uploadHeaders, ...configHeaders, 'Content-Length': fileSize }
+		const signedUploadHeaders = Object.keys(uploadHeaders).map((name) => name.toLowerCase())
+		return this.client.signatureUrlV4(
+			'PUT',
+			expires,
+			{
+				headers,
+				queries: {
+					...configQueries,
+					partNumber: String(partNumber),
+					uploadId
+				}
+			},
+			objectName,
+			['content-length', ...signedUploadHeaders, ...additionalHeaders]
+		)
+	}
+
+	/**
+	 * 列出指定 Multipart Upload 的全部已上传分片。
+	 *
+	 * SDK 单次最多返回 1000 项，本方法会自动读取后续分页。
+	 *
+	 * @param objectName 完整 OSS Object Name。
+	 * @param uploadId Multipart Upload ID。
+	 * @returns 按 partNumber 升序排列的全部分片。
+	 */
+	async listMultipartUploadParts(objectName: string, uploadId: string) {
+		const parts: AliOSSMultipartPart[] = []
+		let marker = 0
+
+		while (true) {
+			const result = await this.client.listParts(objectName, uploadId, {
+				'max-parts': 1000,
+				'part-number-marker': marker,
+				'encoding-type': 'url'
+			})
+			// ali-oss 直接暴露 xml2js 的结果：单个 Part 是对象，多个 Part 才是数组，数值也是字符串。
+			parts.push(...normalizeMultipartParts(result.parts))
+
+			const isTruncated: unknown = result.isTruncated
+			if (isTruncated !== true && isTruncated !== 'true') break
+			const nextMarker = Number(result.nextPartNumberMarker)
+			if (!Number.isSafeInteger(nextMarker) || nextMarker <= marker) {
+				throw new TypeError('OSS ListParts returned an invalid NextPartNumberMarker')
+			}
+			marker = nextMarker
+		}
+
+		return parts.sort((a, b) => a.partNumber - b.partNumber)
+	}
+
+	/**
+	 * 合并指定 Multipart Upload 的全部分片。
+	 *
+	 * @param objectName 完整 OSS Object Name。
+	 * @param uploadId Multipart Upload ID。
+	 * @param parts 已校验并按编号排列的分片列表。
+	 */
+	async completeMultipartUpload(
+		objectName: string,
+		uploadId: string,
+		parts: AliOSSMultipartPart[]
+	): Promise<AliOSSCompleteMultipartUploadResult> {
+		const result = await this.client.completeMultipartUpload(
+			objectName,
+			uploadId,
+			parts.map((part) => ({ number: part.partNumber, etag: part.etag }))
+		)
+		return {
+			bucket: result.bucket,
+			objectName: result.name,
+			etag: result.etag
+		}
+	}
+
+	/**
+	 * 终止 Multipart Upload 并由 OSS 删除已上传但未合并的分片。
+	 *
+	 * @param objectName 完整 OSS Object Name。
+	 * @param uploadId Multipart Upload ID。
+	 */
+	abortMultipartUpload(objectName: string, uploadId: string) {
+		return this.client.abortMultipartUpload(objectName, uploadId)
 	}
 
 	/**
