@@ -15,7 +15,7 @@
 			<Create @success="getTableData"></Create>
 		</div>
 
-		<div class="container min-h-200px flex flex-1 flex-col rounded-4px bg-white p-30px">
+		<div class="main-container min-h-200px flex flex-1 flex-col rounded-4px bg-white p-30px">
 			<el-table :data="tableData" border stripe highlight-current-row class="box-border flex-1" height="100%">
 				<el-table-column min-width="100" prop="account" label="账号" align="center" />
 				<el-table-column min-width="100" prop="name" label="管理员名称" align="center" />
@@ -140,7 +140,7 @@
 
 <style scoped lang="scss">
 	.header,
-	.container {
+	.main-container {
 		border: 1px solid var(--theme-color-border);
 	}
 </style>
