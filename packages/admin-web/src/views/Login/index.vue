@@ -51,6 +51,7 @@
 	import { safe } from 'uxiu/utils'
 	import { account } from '@/api'
 	import { useUserInfo } from '@/stores/useUserInfo'
+	import { useTheme } from '@/stores/useTheme'
 
 	const formData = ref({
 		account: '',
@@ -102,6 +103,7 @@
 		})
 
 		await userInfo.refreshInfo()
+		await useTheme().refreshFromServer()
 		router.push('/')
 	}
 </script>

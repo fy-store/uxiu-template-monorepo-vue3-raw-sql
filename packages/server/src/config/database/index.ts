@@ -7,6 +7,7 @@ const { database } = sys.config.mysql.connect
 
 export const tableName = Object.freeze({
 	ADMIN: 'admin',
+	ADMIN_CONFIG: 'admin_config',
 	SESSION_INFO: 'session_info',
 	API_CLIENT: 'api_client'
 })
@@ -117,6 +118,49 @@ export const tableOptions = defineTables([
 				type: 'datetime',
 				comment: '删除时间',
 				allowNull: true,
+				index: 'index'
+			}
+		]
+	},
+	{
+		databaseName: database,
+		tableName: tableName.ADMIN_CONFIG,
+		comment: '管理员个性化配置表',
+		columns: [
+			{
+				name: 'id',
+				type: 'int',
+				index: 'primaryKey',
+				autoIncrement: true
+			},
+			{
+				name: 'admin_id',
+				type: 'int',
+				comment: '管理员 ID',
+				index: 'unique'
+			},
+			{
+				name: 'value',
+				type: 'json',
+				comment: '个性化配置'
+			},
+			{
+				name: 'create_time',
+				type: 'datetime',
+				comment: '创建时间',
+				default: 'current_timestamp'
+			},
+			{
+				name: 'update_time',
+				type: 'datetime',
+				allowNull: true,
+				comment: '更新时间'
+			},
+			{
+				name: 'delete_time',
+				type: 'datetime',
+				allowNull: true,
+				comment: '删除时间',
 				index: 'index'
 			}
 		]

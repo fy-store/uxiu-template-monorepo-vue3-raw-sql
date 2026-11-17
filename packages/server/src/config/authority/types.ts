@@ -25,6 +25,8 @@ export interface IdentitySession {
 	/** 管理员或其他身份的信息 */
 	info: {
 		id: number
+		/** 身份类型 */
+		type: 'admin' | 'user'
 		/** 是否为超管 */
 		isSuper: boolean
 	}

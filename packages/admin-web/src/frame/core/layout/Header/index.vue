@@ -73,7 +73,7 @@
 		localStorage.removeItem(persistenceKeys.TOKEN)
 		localStorage.removeItem(persistenceKeys.USER_INFO)
 		router.push('/login')
-		await Promise.all([userInfo.refreshInfo(), userInfo.refreshCommonConfig()])
+		await userInfo.refreshInfo()
 	}
 </script>
 

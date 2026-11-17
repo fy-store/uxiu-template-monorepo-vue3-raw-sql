@@ -1,5 +1,4 @@
-import type { CommonConfig } from '@server/api/v1/config'
-import type { App, DeepReadonly } from 'vue'
+import type { App } from 'vue'
 
 export interface BusEvent {
 	/**
@@ -7,9 +6,4 @@ export interface BusEvent {
 	 * @param app 应用实例
 	 */
 	'app:mounted': (app: App<Element>) => void
-	/**
-	 * 登录成功
-	 * @param commonConfig 只读公共配置
-	 */
-	'logined:success': (commonConfig: DeepReadonly<CommonConfig>) => void
 }

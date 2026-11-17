@@ -5,7 +5,7 @@
 				<div>
 					<h2 class="m-0 text-20px font-600">个性化设置</h2>
 					<p class="mt-6px mb-0 text-13px" style="color: var(--theme-color-text-secondary)">
-						选择喜欢的界面主题，设置会保存在当前浏览器中。
+						选择喜欢的界面主题，设置会保存到当前账号。
 					</p>
 				</div>
 				<div class="flex flex-wrap items-center gap-10px">

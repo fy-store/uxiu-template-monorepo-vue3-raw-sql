@@ -186,7 +186,7 @@
 			message.success(msg)
 
 			const userInfo = useUserInfo()
-			await Promise.all([userInfo.refreshInfo(), userInfo.refreshCommonConfig()])
+			await userInfo.refreshInfo()
 			router.push('/')
 		} finally {
 			submitting.value = false

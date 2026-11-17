@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 	import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-	import type { FileFragmentAccessItem } from '@server/api/v1/fileInfo'
+	import type { FileFragmentAccessItem } from './types'
 	import Player from 'xgplayer'
 	import 'xgplayer/dist/index.min.css'
 	import Mp4Plugin from 'xgplayer-mp4'

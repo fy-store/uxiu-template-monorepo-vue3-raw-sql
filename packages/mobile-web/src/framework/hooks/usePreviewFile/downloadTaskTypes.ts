@@ -1,4 +1,4 @@
-import type { FileFragmentAccessItem } from '@server/api/v1/fileInfo'
+import type { FileFragmentAccessItem } from './types'
 
 export type DownloadTaskStatus = 'idle' | 'running' | 'paused'
 

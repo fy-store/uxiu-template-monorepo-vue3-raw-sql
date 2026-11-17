@@ -4,11 +4,9 @@ import { _project, sidebarList } from '@/config/config'
 import { bus } from '@/bus'
 
 import type { MyInfo } from '@server/api/v1/account'
-import { account, config as configApi } from '@/api'
-import type { CommonConfig } from '@server/api/v1/config'
+import { account } from '@/api'
 
 export const info = ref<MyInfo>()
-export const commonConfig = ref<CommonConfig>()
 export async function refreshInfo() {
 	const res = await account.myInfo()
 	if (res.code === 0) {
@@ -21,20 +19,8 @@ export async function refreshInfo() {
 	}
 }
 
-export async function refreshCommonConfig() {
-	const res = await configApi.commonConfig()
-	if (res.code === 0) {
-		commonConfig.value = res.data!
-	} else {
-		commonConfig.value = void 0
-		if (res.error) {
-			throw res.error
-		}
-	}
-}
-
 export async function init() {
-	await Promise.all([refreshInfo(), refreshCommonConfig()])
+	await refreshInfo()
 	bus.once('app:mounted', async () => {
 		watchEffect(() => {
 			const menuList =

@@ -113,10 +113,6 @@ export const whiteRoutes: Omit<AuthorityConfigItem, 'meta'>[] = readonly([
 	},
 	{
 		methods: 'GET',
-		path: 'v1/config/common'
-	},
-	{
-		methods: 'GET',
 		path: 'v1/debug/token'
 	}
 ])
@@ -134,6 +130,14 @@ export const allowRoutes: Omit<AuthorityConfigItem, 'meta'>[] = readonly([
 	{
 		methods: 'POST',
 		path: 'v1/logout'
+	},
+	{
+		methods: 'GET',
+		path: 'v1/personalization/my'
+	},
+	{
+		methods: 'POST',
+		path: 'v1/personalization/update'
 	}
 ])
 

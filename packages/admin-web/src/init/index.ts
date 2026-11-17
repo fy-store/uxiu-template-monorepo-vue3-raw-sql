@@ -1,13 +1,12 @@
 import type { SidebarListItem } from '@/config'
 import type { MyInfo } from '@server/api/v1/account'
-import type { CommonConfig } from '@server/api/v1/config'
 import { bus, busEventName } from '@/bus'
 import { watchEffect, ref } from 'vue'
 import { _project, sidebarList } from '@/config/config'
-import { account, config as configApi } from '@/api'
+import { account } from '@/api'
+import { useTheme } from '@/stores/useTheme'
 
 export const info = ref<MyInfo>()
-export const commonConfig = ref<CommonConfig>()
 export async function refreshInfo() {
 	const res = await account.myInfo()
 	if (res.code === 0) {
@@ -20,20 +19,11 @@ export async function refreshInfo() {
 	}
 }
 
-export async function refreshCommonConfig() {
-	const res = await configApi.commonConfig()
-	if (res.code === 0) {
-		commonConfig.value = res.data!
-	} else {
-		commonConfig.value = void 0
-		if (res.error) {
-			throw res.error
-		}
-	}
-}
-
 export async function init() {
-	await Promise.all([refreshInfo(), refreshCommonConfig()])
+	await refreshInfo()
+	if (info.value) {
+		await useTheme().refreshFromServer()
+	}
 	bus.once(busEventName.APP_MOUNTED, async () => {
 		watchEffect(() => {
 			const menuList =

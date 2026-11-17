@@ -1,7 +1,14 @@
 import type { VNode } from 'vue'
-import type { FileFragmentAccessItem } from '@server/api/v1/fileInfo'
 
 export type DownloadMode = 'browser' | 'directory'
+
+/** 片段文件访问项, 顺序与片段清单一致 */
+export interface FileFragmentAccessItem {
+	/** 片段文件名 */
+	name: string
+	/** 片段访问地址 */
+	url: string
+}
 
 export interface EventTypes {
 	/**
