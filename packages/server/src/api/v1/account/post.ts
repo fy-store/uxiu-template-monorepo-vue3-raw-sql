@@ -92,6 +92,14 @@ postRouter.post('/login/admin', async (ctx) => {
 	}
 })
 
+postRouter.post('/logout', async (ctx) => {
+	await ctx.identitySessionStore.delete(ctx.identitySessionId!)
+	ctx.body = {
+		code: 0,
+		msg: '退出登录成功'
+	}
+})
+
 postRouter.post('/updateMyPassword', async (ctx) => {
 	const q = updateMyPasswordParamsSchema.safeParse(ctx.request.xssBody)
 	if (!q.success) {

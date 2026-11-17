@@ -26,6 +26,7 @@
 <script lang="ts" setup>
 	import { layout, persistenceKeys } from '@/config'
 	import { useUserInfo } from '@/stores'
+	import { account } from '@/api'
 	import { computed } from 'vue'
 	import { useRouter } from 'vue-router'
 
@@ -67,6 +68,8 @@
 			return
 		}
 
+		// 通知后端注销当前 token
+		await account.logout()
 		localStorage.removeItem(persistenceKeys.TOKEN)
 		localStorage.removeItem(persistenceKeys.USER_INFO)
 		router.push('/login')

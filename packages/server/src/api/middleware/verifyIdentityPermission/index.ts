@@ -62,8 +62,8 @@ export function verifyIdentityPermission() {
 			return
 		}
 
-		// 异步更新
-		ctx.identitySessionStore.patch(sessionId, {
+		// 更新会话活跃时间; 必须等待完成, 否则退出登录删除会话时可能产生并发读写冲突
+		await ctx.identitySessionStore.patch(sessionId, {
 			latelyOperationTimer: Date.now(),
 			ip: ctx.ip
 		})

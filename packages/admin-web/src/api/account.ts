@@ -8,6 +8,11 @@ export function loginAdmin(p: LoginParams): PromiseReturn<{ token: string; name:
 	return request.post('login/admin', p)
 }
 
+/** 退出登录, 注销当前 token */
+export function logout(): PromiseReturn {
+	return request.post('logout')
+}
+
 /** 获取当前账号信息 */
 export function myInfo(): PromiseReturn<MyInfo> {
 	return request.get('myInfo')

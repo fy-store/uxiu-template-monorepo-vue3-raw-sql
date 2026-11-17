@@ -130,6 +130,10 @@ export const allowRoutes: Omit<AuthorityConfigItem, 'meta'>[] = readonly([
 	{
 		methods: 'POST',
 		path: 'v1/updateMyPassword'
+	},
+	{
+		methods: 'POST',
+		path: 'v1/logout'
 	}
 ])
 
