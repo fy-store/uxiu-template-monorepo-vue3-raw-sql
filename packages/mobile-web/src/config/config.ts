@@ -6,10 +6,10 @@
  */
 import type { Layout, Project, SidebarListItem } from './types'
 import { reactive, readonly, ref } from 'vue'
-import { Theme, CacheComponent, syncVarletTheme } from '@/framework/utils'
+import { Theme, CacheComponent, syncVarletTheme } from '@/frame/utils'
 
 export const _project = reactive<Project>({
-	name: '移动端管理系统',
+	name: '移动端测试系统',
 	description: 'Vue 3 + Koa 3 移动端模板',
 	apiURL: import.meta.env.VITE_API_URL,
 	/** 是否开启路由白名单校验 */

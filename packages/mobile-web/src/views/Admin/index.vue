@@ -53,13 +53,13 @@
 	import type { SearchParams } from './types'
 	import { admin } from '@/api'
 	import { useUserInfo } from '@/stores'
-	import { usePagination } from '@/framework/hooks/usePagination'
+	import { usePagination } from '@/frame/hooks/usePagination/index.ts'
 	import Create from './Create.vue'
 	import Edit from './Edit.vue'
 	import ViewAuthority from './ViewAuthority.vue'
 	import dayjs from 'dayjs'
 	import { ref } from 'vue'
-	import { confirm, message } from '@/framework/utils'
+	import { confirm, message } from '@/frame/utils/index.ts'
 
 	// 列表
 	const userInfo = useUserInfo()

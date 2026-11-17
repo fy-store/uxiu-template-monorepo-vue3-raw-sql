@@ -50,7 +50,7 @@
 	import { useRouter } from 'vue-router'
 	import { useUserInfo } from '@/stores/useUserInfo'
 	import { onBeforeUnmount, onMounted, ref } from 'vue'
-	import { message } from '@/framework/utils'
+	import { message } from '@/frame/utils/index.ts'
 
 	const formData = ref({
 		account: '',
@@ -176,9 +176,9 @@
 				return
 			}
 
-			localStorage.setItem(persistenceKeys.token, data!.token)
+			localStorage.setItem(persistenceKeys.TOKEN, data!.token)
 			localStorage.setItem(
-				persistenceKeys.userInfo,
+				persistenceKeys.USER_INFO,
 				JSON.stringify({
 					name: data!.name
 				})

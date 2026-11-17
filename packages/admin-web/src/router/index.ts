@@ -13,7 +13,6 @@ export const router = createRouter({
 				cache: true,
 				// 固定在 nav 中, 始终存在且不可关闭
 				fixed: true,
-				pageTitle: '首页',
 				// 根路径默认生成的缓存名为空, KeepAlive 不会缓存, 这里显式指定一个非空组件名
 				generateName: () => '/home'
 			},

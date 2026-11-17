@@ -16,7 +16,7 @@
 	 * - 其余属性与事件均透传给底层组件
 	 */
 	import { watch } from 'vue'
-	import { useChangeLocation } from '@/framework/hooks'
+	import { useChangeLocation } from '@/frame/hooks'
 
 	defineOptions({ inheritAttrs: false })
 

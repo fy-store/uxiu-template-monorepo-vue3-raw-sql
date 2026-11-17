@@ -20,7 +20,6 @@
     "@tiptap/pm": "^3.31.4",
     "@tiptap/starter-kit": "^3.31.4",
     "element-plus": "^2.14.3",
-    "event-imt": "1.0.0-alpha.1",
     "markdown-it-task-lists": "^2.1.1",
     "pinia": "^4.0.2",
     "shaka-player": "^5.2.1",

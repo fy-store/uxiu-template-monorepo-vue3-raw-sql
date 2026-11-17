@@ -97,13 +97,13 @@
 </template>
 
 <script setup lang="ts">
-	import type { DownloadMode, TemplateProps, InitDecryptContext, PreviewInfoItem } from './types'
-	import type { DownloadTaskSource } from './downloadTaskTypes'
+	import type { DownloadMode, TemplateProps, InitDecryptContext, PreviewInfoItem } from './types.ts'
+	import type { DownloadTaskSource } from './downloadTaskTypes.ts'
 	import { computed, ref, onBeforeUnmount, watch } from 'vue'
 	import { persistenceKeys } from '@/config'
 	import { Path } from '@/utils'
-	import { message } from '@/framework/utils'
-	import Popup from '@/framework/components/Popup/index.vue'
+	import { message } from '@/frame/utils/index.ts'
+	import Popup from '@/frame/components/Popup/index.vue'
 	import DownloadActions from './DownloadActions.vue'
 	import PasswordDialog from './PasswordDialog.vue'
 	import ImagePreview from './ImagePreview.vue'
@@ -117,8 +117,8 @@
 		getSafeDownloadName,
 		isAbortError,
 		selectDownloadDir
-	} from './download'
-	import { useDownloadTask } from './useDownloadTask'
+	} from './download.ts'
+	import { useDownloadTask } from './useDownloadTask.ts'
 	import './styles.scss'
 
 	type Action = 'preview' | 'download'
@@ -148,7 +148,7 @@
 	} = useDownloadTask()
 
 	watch(downloadMode, (value) => {
-		localStorage.setItem(persistenceKeys.previewFileDownloadMode, value)
+		localStorage.setItem(persistenceKeys.PREVIEW_FILE_DOWNLOAD_MODE, value)
 	})
 
 	// 解密后的信息
@@ -275,7 +275,7 @@
 	 * @returns 已持久化的下载方式，无有效值时使用普通下载。
 	 */
 	function getStoredDownloadMode(): DownloadMode {
-		const value = localStorage.getItem(persistenceKeys.previewFileDownloadMode)
+		const value = localStorage.getItem(persistenceKeys.PREVIEW_FILE_DOWNLOAD_MODE)
 		return value === 'directory' ? 'directory' : 'browser'
 	}
 

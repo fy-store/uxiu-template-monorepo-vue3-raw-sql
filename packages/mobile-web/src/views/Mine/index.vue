@@ -47,7 +47,7 @@
 	import dayjs from 'dayjs'
 	import { persistenceKeys } from '@/config'
 	import { useUserInfo } from '@/stores'
-	import { confirm } from '@/framework/utils'
+	import { confirm } from '@/frame/utils'
 
 	const router = useRouter()
 	const userInfo = useUserInfo()
@@ -70,8 +70,8 @@
 			return
 		}
 
-		localStorage.removeItem(persistenceKeys.token)
-		localStorage.removeItem(persistenceKeys.userInfo)
+		localStorage.removeItem(persistenceKeys.TOKEN)
+		localStorage.removeItem(persistenceKeys.USER_INFO)
 		router.push('/login')
 		await userInfo.refreshInfo()
 	}

@@ -1,4 +1,4 @@
-import type { Options, Config, EventTypes } from './types'
+import type { Options, Config, EventTypes } from './types.ts'
 import { ref, reactive, h, defineComponent, onActivated, markRaw } from 'vue'
 import Template from './Template.vue'
 import { Bus, type InterfaceToType } from 'event-imt'

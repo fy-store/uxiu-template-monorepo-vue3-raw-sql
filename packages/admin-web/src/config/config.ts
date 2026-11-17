@@ -13,9 +13,9 @@ import { defaultThemePreset, getThemePresetById } from './themes'
 import { persistenceKeys } from './persistence'
 
 export const _project = reactive<Project>({
-	name: '工单系统',
+	name: '后台测试系统',
 	logo: '',
-	description: '工单系统',
+	description: 'Vue 3 + Koa 3 后台模板',
 	apiURL: import.meta.env.VITE_API_URL,
 	sidebar: {
 		list: []

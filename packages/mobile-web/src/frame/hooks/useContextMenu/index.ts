@@ -1,4 +1,4 @@
-import type { Config, EventTypes, MenuItem, OpenOptions, Options, Position } from './types'
+import type { Config, EventTypes, MenuItem, OpenOptions, Options, Position } from './types.ts'
 import {
 	createVNode,
 	render,

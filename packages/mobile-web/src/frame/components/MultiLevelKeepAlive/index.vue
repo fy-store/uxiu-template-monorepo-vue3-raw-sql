@@ -16,7 +16,7 @@
 	 * - 通过路由 meta.isTransition 控制页面切换动画, 默认为开启
 	 * - 需要配合 `packages\mobile-web\src\framework\utils\cacheComponent` 工具类使用，以实现多层级路由的组件缓存功能
 	 */
-	import { type CacheComponent } from '@/framework/utils'
+	import { type CacheComponent } from '@/frame/utils'
 	import { sidebarList } from '@/config'
 	import { computed, inject, onBeforeUnmount, ref, unref } from 'vue'
 	import { useRouter, viewDepthKey } from 'vue-router'

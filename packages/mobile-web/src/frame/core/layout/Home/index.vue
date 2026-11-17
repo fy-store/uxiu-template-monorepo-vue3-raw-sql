@@ -11,7 +11,7 @@
 	import { useRoute } from 'vue-router'
 	import { theme, cacheComponent } from '@/config'
 	import BottomNav from '../BottomNav/index.vue'
-	import MultiLevelKeepAlive from '@/framework/components/MultiLevelKeepAlive/index.vue'
+	import MultiLevelKeepAlive from '@/frame/components/MultiLevelKeepAlive/index.vue'
 
 	const route = useRoute()
 </script>

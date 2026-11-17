@@ -4,7 +4,7 @@
  * - 新增键名需要使用项目命名空间，避免与同域其他系统冲突。
  */
 export const persistenceKeys = {
-	token: 'sys:auth:token',
-	userInfo: 'sys:auth:user-info',
-	previewFileDownloadMode: 'sys:preview-file:download-mode'
+	TOKEN: 'sys:auth:token',
+	USER_INFO: 'sys:auth:user-info',
+	PREVIEW_FILE_DOWNLOAD_MODE: 'sys:preview-file:download-mode'
 } as const

@@ -1,10 +1,10 @@
-import type { EventTypes, TemplateProps, PreviewOptions } from './types'
+import type { EventTypes, TemplateProps, PreviewOptions } from './types.ts'
 import { Bus, type InterfaceToType } from 'event-imt'
 import { createVNode, nextTick, render, type VNode } from 'vue'
-import { waitChangeLocationIdle } from '@/framework/hooks/useChangeLocation'
+import { waitChangeLocationIdle } from '@/frame/hooks/useChangeLocation/index.ts'
 import Template from './Template.vue'
 
-export type { DownloadMode, PreviewOptions, InitDecryptContext, PreviewInfoItem } from './types'
+export type { DownloadMode, PreviewOptions, InitDecryptContext, PreviewInfoItem } from './types.ts'
 
 /** 关闭动画兜底时长, 略大于弹层过渡时长(避免事件缺失时挂载点残留) */
 const CLOSE_FALLBACK_DELAY = 400

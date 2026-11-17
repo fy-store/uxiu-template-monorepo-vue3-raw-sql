@@ -28,7 +28,7 @@ export function beforeEach(to: RouteLocationNormalized, _from: RouteLocationNorm
 		}
 	}
 
-	if (localStorage.getItem(persistenceKeys.token)) {
+	if (localStorage.getItem(persistenceKeys.TOKEN)) {
 		return true
 	}
 

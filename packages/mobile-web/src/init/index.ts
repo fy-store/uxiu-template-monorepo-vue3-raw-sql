@@ -1,7 +1,7 @@
 import type { SidebarListItem } from '@/config'
 import { watchEffect, ref } from 'vue'
 import { _project, sidebarList } from '@/config/config'
-import { bus } from '@/bus'
+import { bus, busEventName } from '@/bus'
 
 import type { MyInfo } from '@server/api/v1/account'
 import { account } from '@/api'
@@ -21,7 +21,7 @@ export async function refreshInfo() {
 
 export async function init() {
 	await refreshInfo()
-	bus.once('app:mounted', async () => {
+	bus.once(busEventName.APP_MOUNTED, async () => {
 		watchEffect(() => {
 			const menuList =
 				info.value?.authority

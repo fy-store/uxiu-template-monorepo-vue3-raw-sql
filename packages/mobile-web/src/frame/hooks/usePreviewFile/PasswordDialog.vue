@@ -22,7 +22,7 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
-import Popup from '@/framework/components/Popup/index.vue'
+import Popup from '@/frame/components/Popup/index.vue'
 
 const props = defineProps<{ visible: boolean }>()
 const emit = defineEmits<{

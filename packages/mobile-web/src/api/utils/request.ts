@@ -10,7 +10,7 @@ export const request = axios.create({
 })
 
 request.interceptors.request.use((req) => {
-	const token = localStorage.getItem(persistenceKeys.token) ?? ''
+	const token = localStorage.getItem(persistenceKeys.TOKEN) ?? ''
 	req.headers.Authorization = `bearer ${token}`
 	return req
 })

@@ -23,9 +23,9 @@
 	import type { Admin } from '@server/api/v1/admin'
 	import type { Authority } from '@server/api/v1/authority'
 	import { ref } from 'vue'
-	import Popup from '@/framework/components/Popup/index.vue'
+	import Popup from '@/frame/components/Popup/index.vue'
 	import { account } from '@/api'
-	import { message } from '@/framework/utils'
+	import { message } from '@/frame/utils/index.ts'
 	import AuthoritySelect from './AuthoritySelect.vue'
 
 	const visible = defineModel<boolean>({ default: false })
