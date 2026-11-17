@@ -1,0 +1,122 @@
+/**
+ * Varlet 组件全局覆盖样式
+ * 主题相关的 CSS 变量由 `src/framework/utils/varletTheme.ts` 从项目主题同步
+ * 此处仅维护不属于主题系统的组件尺寸覆盖 (px 会被 postcss 转换为 vmin)
+ */
+:root {
+	/** 底部标签栏高度 */
+	--bottom-navigation-height: 56px;
+}
+
+/**
+ * 图标字形行高
+ * Varlet 默认给 `.var-icon::before` 设置 `line-height: 1`, 图标会在文本行内偏高;
+ * 覆盖为继承, 使图标跟随项目全局行高(html 1.2)在行内自然垂直居中
+ */
+.var-icon.var-icon--set::before {
+	line-height: inherit;
+}
+
+/**
+ * 移动端弹层表单通用样式
+ * 供各业务模块的 var-popup 表单弹层复用
+ */
+.form-popup {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 80dvh;
+    overflow: hidden;
+    border-radius: 12px 12px 0 0;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+.form-popup__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-outline);
+    font-weight: 500;
+    font-size: 16px;
+}
+
+/** 弹层头部关闭按钮: 固定点击区域并与标题对齐 */
+.form-popup__header .var-button {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    margin-right: -6px;
+    padding: 0;
+    color: var(--color-on-surface-variant);
+}
+
+.form-popup__body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.form-popup__footer {
+    display: flex;
+    flex-shrink: 0;
+    gap: 12px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--color-outline);
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-field--row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.form-field__label {
+    font-size: 13px;
+    color: var(--theme-color-textSecondary);
+}
+
+.form-field__tip {
+    font-size: 12px;
+    color: var(--theme-color-placeholder);
+}
+
+/** 授权目录等字符串值的可删除标签 */
+.path-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 14px;
+    background-color: color-mix(in srgb, var(--theme-color-primary) 10%, transparent);
+    color: var(--theme-color-primary);
+    font-size: 12px;
+}
+
+/** 消息提示关闭按钮: 由 message 封装渲染在 Snackbar 右侧, 放大移动端点击区域 */
+.feedback-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.feedback-close:active {
+    opacity: 0.6;
+}

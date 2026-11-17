@@ -1,0 +1,4 @@
+interface:
+  display_name: "Uxiu Template Admin Web"
+  short_description: "遵循项目封装与仅类型导入约定（配置走 HTTP）开发 Vue 3 前端"
+  default_prompt: "Use $uxiu-template-admin-web to implement this Vue frontend task with the template conventions."

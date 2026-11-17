@@ -1,0 +1,135 @@
+/**
+ * 移动端页面通用样式
+ * - 供各 tab 页复用: 工具条、胶囊搜索框、图标按钮、列表卡片与卡片内文本
+ * - 仅收录跨页面复用的一致化样式, 页面独有样式仍写在各自组件内
+ */
+
+/* 页面工具条: 固定在列表顶部, 与内容区以分割线区分 */
+.page-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-shrink: 0;
+	padding: 10px 12px;
+	border-bottom: 1px solid var(--theme-color-border);
+	background-color: var(--theme-color-surface);
+
+	/* 工具条内按钮统一为 40px 高度, 与搜索框对齐 */
+	> .var-button {
+		flex-shrink: 0;
+		height: 40px;
+		border-radius: 20px;
+	}
+}
+
+/* 胶囊搜索框: 隐藏字段下划线, 使用圆角浅色底 */
+.search-field {
+	display: flex;
+	align-items: center;
+	flex: 1;
+	min-width: 0;
+	height: 40px;
+	padding: 0 12px;
+	border-radius: 20px;
+	background-color: var(--theme-color-background);
+	--input-input-font-size: 14px;
+	--field-decorator-placeholder-size: 14px;
+	--field-decorator-standard-normal-margin-top: 0px;
+	--field-decorator-standard-normal-margin-bottom: 0px;
+	--field-decorator-standard-normal-icon-margin-top: 0px;
+	--field-decorator-standard-normal-icon-margin-bottom: 0px;
+	--field-decorator-standard-normal-non-hint-margin-top: 0px;
+	--field-decorator-standard-small-non-hint-margin-top: 0px;
+
+	.var-field-decorator,
+	.var-field-decorator__controller {
+		width: 100%;
+	}
+
+	.var-field-decorator__controller {
+		padding: 0;
+	}
+
+	.var-field-decorator__middle,
+	.var-field-decorator__icon {
+		margin: 0;
+	}
+
+	/* 胶囊样式无浮动标签空间, 浮动态占位直接隐藏 */
+	.var-field-decorator--placeholder-hint {
+		display: none;
+	}
+
+	.var-field-decorator__icon:first-child {
+		margin-right: 6px;
+	}
+
+	/* 使用整块圆角底代替默认下划线 */
+	.var-field-decorator__line,
+	.var-field-decorator__dot {
+		display: none;
+	}
+}
+
+/* 工具条图标按钮: 圆形浅色底 */
+.var-button.icon-button {
+	flex-shrink: 0;
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	border-radius: 50%;
+	background-color: var(--theme-color-background);
+	color: var(--theme-color-textSecondary);
+}
+
+/* 列表卡片: 列表页统一的白色圆角卡片 */
+.list-card {
+	padding: 12px;
+	border-radius: var(--theme-radius-lg, 12px);
+	background-color: var(--theme-color-surface);
+	box-shadow: var(--theme-shadow-base);
+}
+
+/* 卡片标题与副标题 */
+.card-title {
+	font-weight: 500;
+	font-size: 15px;
+	line-height: 21px;
+	color: var(--theme-color-text);
+	word-break: break-all;
+}
+
+.card-subtitle {
+	font-size: 12px;
+	line-height: 18px;
+	color: var(--theme-color-textSecondary);
+	word-break: break-all;
+}
+
+/* 卡片内元信息行: 自动换行, 行距统一 */
+.card-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 12px;
+	margin-top: 8px;
+	font-size: 12px;
+	line-height: 18px;
+	color: var(--theme-color-textSecondary);
+	word-break: break-all;
+}
+
+/* 列表空状态: 去除默认白色底, 与页面底色融合 */
+.var-result.var--box {
+	background-color: transparent;
+}
+
+/* 列表滚动容器: 空状态在可用区域内垂直居中 */
+.list-scroll {
+	display: flex;
+	flex-direction: column;
+
+	> .var-result {
+		flex: 1;
+		justify-content: center;
+	}
+}

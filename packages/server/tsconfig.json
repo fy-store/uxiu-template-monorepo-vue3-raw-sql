@@ -1,0 +1,38 @@
+{
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "noEmitOnError": false,
+        "strict": true,
+        "target": "ESNext",
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "skipLibCheck": true,
+        // "noEmit": true,
+        // "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": true,
+        "forceConsistentCasingInFileNames": true,
+        "paths": {
+            "@server/*": [
+                "./src/*"
+            ],
+            "@common/*": [
+                "../common/src/*"
+            ]
+        }
+    },
+    "include": [
+        "./src/**/*",
+        "./scripts/**/*",
+        "./sys.config.ts",
+        "./uxiu-cli.config.ts"
+    ],
+    "lib": [
+        "esnext",
+        "NodeNext"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}

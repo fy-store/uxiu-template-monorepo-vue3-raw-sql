@@ -1,0 +1,43 @@
+.sys-context-menu {
+	position: fixed;
+	padding: 6px 0;
+	background: #ffffff;
+	border-radius: 6px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+	color: #1f1f1f;
+	user-select: none;
+	min-width: 160px;
+	z-index: 2000;
+}
+
+.sys-context-menu-item {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 14px;
+	cursor: pointer;
+	line-height: 1.4;
+}
+
+.sys-context-menu-item:hover {
+	background: #f5f6f7;
+}
+
+.sys-context-menu-item.is-disabled {
+	color: #bfbfbf;
+	cursor: not-allowed;
+}
+
+.sys-context-menu-item.is-disabled:hover {
+	background: transparent;
+}
+
+.sys-context-menu-label {
+	flex: 1;
+}
+
+.sys-context-menu-divider {
+	height: 1px;
+	margin: 4px 0;
+	background: #ebeef5;
+}

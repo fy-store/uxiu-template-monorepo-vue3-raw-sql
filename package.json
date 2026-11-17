@@ -1,0 +1,56 @@
+{
+  "type": "module",
+  "name": "uxiu-template-monorepo-vue3-raw-sql",
+  "version": "1.1.0",
+  "description": "Vue 3 + Koa 3 管理系统模板",
+  "scripts": {
+    "build": "pnpm -r build && tsx ./scripts/moveDist.ts",
+    "dev": "pnpm -r --parallel --stream dev",
+    "start:dist": "cd ./dist && pnpm i && node src/index.js",
+    "dev:dist": "cd ./dist && pnpm i && node --watch src/index.js",
+    "dev:server": "cd ./packages/server && node --run dev",
+    "debug:server": "cd ./packages/server && node --run debug",
+    "dev:admin-web": "cd ./packages/admin-web && node --run dev",
+    "dev:mobile-web": "cd ./packages/mobile-web && node --run dev",
+    "test": "pnpm run type-check",
+    "type-check": "pnpm run type-check:common && pnpm run type-check:server && pnpm run type-check:admin-web",
+    "type-check:common": "pnpm --dir packages/common exec tsc --noEmit -p tsconfig.json --pretty false",
+    "type-check:server": "pnpm --dir packages/server exec tsc --noEmit -p tsconfig.json --pretty false",
+    "type-check:admin-web": "pnpm --dir packages/admin-web type-check",
+    "init:db": "cd ./packages/server && node --run init:db",
+    "init:root": "cd ./packages/server && node --run init:root",
+    "key": "cd ./packages/server && node --run key",
+    "key:pair": "cd ./packages/server && node --run key:pair",
+    "rm:modules": "node ./scripts/rmModule.ts"
+  },
+  "author": "feiYu <feiyucode@gmail.com>",
+  "license": "MIT",
+  "keywords": [
+    "uxiu",
+    "uxiu-cli"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@ffmpeg/core": "0.12.10",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
+    "ali-oss": "^6.23.0",
+    "axios": "^1.18.1",
+    "core-js": "^3.49.0",
+    "dayjs": "^1.11.21",
+    "event-imt": "0.2.7",
+    "json5": "^2.2.3",
+    "mime": "^4.1.0",
+    "uxiu": "^0.23.0-beta.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/ali-oss": "^6.23.3",
+    "@types/node": "^26.1.1",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}

@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "noEmitOnError": false,
+        "strict": true,
+        "target": "ESNext",
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "skipLibCheck": true,
+        // "noEmit": true,
+        // "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": true,
+        "forceConsistentCasingInFileNames": true,
+        "paths": {},
+        "types": ["node"]
+    },
+    "include": [
+        "./src/**/*"
+    ],
+    "lib": [
+        "esnext",
+        "NodeNext"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}

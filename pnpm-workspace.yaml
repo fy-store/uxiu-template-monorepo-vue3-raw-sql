@@ -1,0 +1,13 @@
+packages:
+  - 'packages/*'
+  - 'dist'
+allowBuilds:
+  '@parcel/watcher': true
+  bcrypt: true
+  core-js: true
+  es5-ext: true
+  esbuild: true
+  vue-demi: true
+minimumReleaseAgeExclude:
+  - inkline-js@0.0.1-beta || 0.0.1-beta.1 || 0.0.1-beta.2 || 0.0.1-beta.3 || 0.0.1-beta.4
+  - '@yishu/inkline@0.0.1-beta.5'

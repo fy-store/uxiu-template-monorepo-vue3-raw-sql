@@ -1,0 +1,180 @@
+/* 标题栏: 文件名与关闭按钮, 关闭按钮始终固定可见 */
+.header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+	padding: 14px 16px 10px;
+}
+
+.header-main {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1;
+	min-width: 0;
+}
+
+/* 操作区: 下载方式与解密操作 */
+.toolbar {
+	flex-shrink: 0;
+	padding: 0 16px 12px;
+	border-bottom: 1px solid var(--theme-color-border, var(--color-outline));
+}
+
+/* 内容区: 预览视口与底部信息卡片 */
+.body {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.body :deep(.var-loading__content) {
+	height: 100%;
+}
+
+.body-inner {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+	box-sizing: border-box;
+}
+
+.viewport {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	border-radius: 12px;
+}
+
+/* 预览不可用时的占位提示 */
+.empty-state {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	gap: 10px;
+	width: 100%;
+	height: 100%;
+	background-color: var(--theme-color-background);
+	color: var(--color-on-surface-variant);
+}
+
+.empty-state__icon {
+	font-size: 44px;
+	color: color-mix(in srgb, var(--color-on-surface-variant) 45%, transparent);
+}
+
+.empty-state__text {
+	padding: 0 24px;
+	font-size: 13px;
+	line-height: 20px;
+	text-align: center;
+}
+
+/* 底部文件信息卡片: 默认展开, 点击标题行可收起 */
+.info-pane {
+	flex-shrink: 0;
+	margin-top: 10px;
+	overflow: hidden;
+	border-radius: 12px;
+	background-color: var(--color-surface-container-low, rgba(0, 0, 0, 0.05));
+}
+
+.info-toggle {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	padding: 10px 12px;
+	border: none;
+	outline: none;
+	background: none;
+	color: var(--color-on-surface-variant);
+	font-size: 13px;
+	line-height: 18px;
+	text-align: left;
+	cursor: pointer;
+}
+
+.info-toggle__title {
+	flex: 1;
+	min-width: 0;
+}
+
+.info-content {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.25s ease;
+}
+
+.info-pane--expanded .info-content {
+	max-height: 38dvh;
+}
+
+.info-content__inner {
+	max-height: 38dvh;
+	overflow-y: auto;
+	padding: 0 12px 4px;
+	box-sizing: border-box;
+}
+
+.info-item {
+	display: flex;
+	gap: 12px;
+	padding: 7px 0;
+	font-size: 13px;
+	line-height: 18px;
+}
+
+.info-item + .info-item {
+	border-top: 1px solid color-mix(in srgb, var(--color-outline) 55%, transparent);
+}
+
+.info-item__label {
+	flex-shrink: 0;
+	width: 68px;
+	color: var(--color-on-surface-variant);
+}
+
+.info-item__value {
+	flex: 1;
+	min-width: 0;
+	color: var(--theme-color-text);
+	word-break: break-all;
+	white-space: pre-wrap;
+}
+
+.title {
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	font-weight: 600;
+	font-size: 16px;
+	line-height: 22px;
+	color: var(--theme-color-text);
+}
+
+.decrypted-tag {
+	flex-shrink: 0;
+	padding: 1px 8px;
+	border-radius: 999px;
+	font-size: 11px;
+	line-height: 17px;
+	color: var(--color-warning);
+	background-color: color-mix(in srgb, var(--color-warning) 14%, transparent);
+}
+
+.close-btn {
+	flex-shrink: 0;
+	width: 36px;
+	height: 36px;
+	margin-right: -8px;
+	padding: 0;
+	color: var(--color-on-surface-variant);
+}

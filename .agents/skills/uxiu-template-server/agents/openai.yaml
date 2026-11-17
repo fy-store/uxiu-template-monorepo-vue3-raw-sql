@@ -1,0 +1,4 @@
+interface:
+  display_name: "Uxiu Template Server"
+  short_description: "按请求方法拆分 API、模块化类型导出与数据库 schema 校验开发 Koa 后端"
+  default_prompt: "Use $uxiu-template-server to implement this server API or database task with the template conventions."

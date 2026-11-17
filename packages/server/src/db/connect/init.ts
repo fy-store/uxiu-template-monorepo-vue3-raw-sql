@@ -1,0 +1,16 @@
+import mysql from 'mysql2/promise'
+import { sys } from '@server/config'
+
+export default async () => {
+	const { host, user, port, password, database } = sys.config.mysql.connect
+	const connection = await mysql.createConnection({
+		host,
+		user,
+		port,
+		password
+	})
+	await connection.query(
+		`create database if not exists ${database} default character set utf8mb4 default collate utf8mb4_bin`
+	)
+	await connection.end()
+}

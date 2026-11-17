@@ -1,0 +1,22 @@
+@use './reset.scss';
+@use './custom-varlet.scss';
+@use './page.scss';
+
+html {
+    font-size: 14px;
+    line-height: 1.2;
+    color: var(--theme-color-text);
+    background-color: var(--theme-color-background);
+}
+
+html,
+body,
+#app {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+}

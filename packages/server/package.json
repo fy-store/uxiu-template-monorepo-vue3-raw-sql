@@ -1,0 +1,48 @@
+{
+  "type": "module",
+  "name": "server",
+  "version": "0.0.0",
+  "description": "后端服务",
+  "main": "./src/index.ts",
+  "scripts": {
+    "start": "tsx ./src/index.ts",
+    "start:test": "cross-env NODE_ENV=development tsx ./src/index.ts",
+    "start:dist": "cd ./dist && node --run start",
+    "build": "uxiu-cli build",
+    "dev": "cross-env NODE_ENV=development tsx watch ./src/index.ts",
+    "debug": "cross-env NODE_ENV=development tsx watch --inspect-brk ./src/index.ts",
+    "key": "cross-env NODE_ENV=development tsx ./scripts/key.ts",
+    "key:pair": "cross-env NODE_ENV=development tsx ./scripts/keyPair.ts",
+    "init:root": "cross-env NODE_ENV=development tsx ./scripts/initRoot.ts",
+    "init:db": "cross-env NODE_ENV=development tsx ./scripts/initDb.ts"
+  },
+  "dependencies": {
+    "@koa/bodyparser": "^6.1.0",
+    "@koa/cors": "^5.0.0",
+    "@koa/multer": "^4.0.0",
+    "@koa/router": "^15.7.0",
+    "@koa/send": "^6.0.0",
+    "bcrypt": "^6.0.0",
+    "json5": "^2.2.3",
+    "koa": "^3.2.1",
+    "multer": "^2.2.0",
+    "mysql2": "^3.23.0",
+    "nodemailer": "^10.1.0",
+    "path-to-regexp": "^8.4.2",
+    "pino": "^10.3.1",
+    "xss": "^1.0.15"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/koa": "^3.0.3",
+    "@types/koa-bodyparser": "^4.3.13",
+    "@types/koa-send": "^4.1.6",
+    "@types/koa__cors": "^5.0.1",
+    "@types/koa__multer": "^2.0.8",
+    "@types/nodemailer": "^8.0.2",
+    "cross-env": "^10.1.0",
+    "prettier": "^3.9.5",
+    "typescript": "^7.0.2",
+    "uxiu-cli": "0.10.3"
+  }
+}

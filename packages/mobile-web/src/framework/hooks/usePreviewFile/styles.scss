@@ -1,0 +1,11 @@
+// 文件预览弹层: 作为移动端全屏底部抽屉展示
+.sys-preview-file-popup {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100dvh;
+	overflow: hidden;
+	border-radius: 16px 16px 0 0;
+	background-color: var(--color-body, #fff);
+	box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.12);
+}

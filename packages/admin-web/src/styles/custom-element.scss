@@ -1,0 +1,91 @@
+/**
+ * Element Plus 主题变量映射
+ * 主题切换只会更新 :root 上的 --theme-* 变量, 这里把 Element Plus 的变量统一指向主题变量,
+ * 使按钮、标签、菜单、表格等组件跟随主题切换。
+ * 使用 html:root 提高优先级, 避免与 Element Plus 自带的 :root 变量因加载顺序互相覆盖。
+ */
+html:root {
+	/* 主色及其深浅梯度 */
+	--el-color-primary: var(--theme-color-primary);
+	--el-color-primary-light-3: color-mix(in srgb, var(--theme-color-primary) 70%, #fff);
+	--el-color-primary-light-5: color-mix(in srgb, var(--theme-color-primary) 50%, #fff);
+	--el-color-primary-light-7: color-mix(in srgb, var(--theme-color-primary) 30%, #fff);
+	--el-color-primary-light-8: color-mix(in srgb, var(--theme-color-primary) 20%, #fff);
+	--el-color-primary-light-9: color-mix(in srgb, var(--theme-color-primary) 10%, #fff);
+	--el-color-primary-dark-2: color-mix(in srgb, var(--theme-color-primary) 80%, #000);
+
+	/* 语义色及其深浅梯度 */
+	--el-color-success: var(--theme-color-success);
+	--el-color-success-light-3: color-mix(in srgb, var(--theme-color-success) 70%, #fff);
+	--el-color-success-light-5: color-mix(in srgb, var(--theme-color-success) 50%, #fff);
+	--el-color-success-light-7: color-mix(in srgb, var(--theme-color-success) 30%, #fff);
+	--el-color-success-light-8: color-mix(in srgb, var(--theme-color-success) 20%, #fff);
+	--el-color-success-light-9: color-mix(in srgb, var(--theme-color-success) 10%, #fff);
+	--el-color-success-dark-2: color-mix(in srgb, var(--theme-color-success) 80%, #000);
+
+	--el-color-warning: var(--theme-color-warning);
+	--el-color-warning-light-3: color-mix(in srgb, var(--theme-color-warning) 70%, #fff);
+	--el-color-warning-light-5: color-mix(in srgb, var(--theme-color-warning) 50%, #fff);
+	--el-color-warning-light-7: color-mix(in srgb, var(--theme-color-warning) 30%, #fff);
+	--el-color-warning-light-8: color-mix(in srgb, var(--theme-color-warning) 20%, #fff);
+	--el-color-warning-light-9: color-mix(in srgb, var(--theme-color-warning) 10%, #fff);
+	--el-color-warning-dark-2: color-mix(in srgb, var(--theme-color-warning) 80%, #000);
+
+	--el-color-danger: var(--theme-color-danger);
+	--el-color-danger-light-3: color-mix(in srgb, var(--theme-color-danger) 70%, #fff);
+	--el-color-danger-light-5: color-mix(in srgb, var(--theme-color-danger) 50%, #fff);
+	--el-color-danger-light-7: color-mix(in srgb, var(--theme-color-danger) 30%, #fff);
+	--el-color-danger-light-8: color-mix(in srgb, var(--theme-color-danger) 20%, #fff);
+	--el-color-danger-light-9: color-mix(in srgb, var(--theme-color-danger) 10%, #fff);
+	--el-color-danger-dark-2: color-mix(in srgb, var(--theme-color-danger) 80%, #000);
+
+	--el-color-error: var(--theme-color-danger);
+	--el-color-error-light-3: color-mix(in srgb, var(--theme-color-danger) 70%, #fff);
+	--el-color-error-light-5: color-mix(in srgb, var(--theme-color-danger) 50%, #fff);
+	--el-color-error-light-7: color-mix(in srgb, var(--theme-color-danger) 30%, #fff);
+	--el-color-error-light-8: color-mix(in srgb, var(--theme-color-danger) 20%, #fff);
+	--el-color-error-light-9: color-mix(in srgb, var(--theme-color-danger) 10%, #fff);
+	--el-color-error-dark-2: color-mix(in srgb, var(--theme-color-danger) 80%, #000);
+
+	--el-color-info: var(--theme-color-info);
+	--el-color-info-light-3: color-mix(in srgb, var(--theme-color-info) 70%, #fff);
+	--el-color-info-light-5: color-mix(in srgb, var(--theme-color-info) 50%, #fff);
+	--el-color-info-light-7: color-mix(in srgb, var(--theme-color-info) 30%, #fff);
+	--el-color-info-light-8: color-mix(in srgb, var(--theme-color-info) 20%, #fff);
+	--el-color-info-light-9: color-mix(in srgb, var(--theme-color-info) 10%, #fff);
+	--el-color-info-dark-2: color-mix(in srgb, var(--theme-color-info) 80%, #000);
+
+	/* 文本 */
+	--el-text-color-primary: var(--theme-color-text);
+	--el-text-color-regular: var(--theme-color-textSecondary);
+	--el-text-color-secondary: var(--theme-color-placeholder);
+	--el-text-color-placeholder: var(--theme-color-placeholder);
+	--el-text-color-disabled: var(--theme-color-disabled);
+
+	/* 背景与填充 */
+	--el-bg-color: var(--theme-color-surface);
+	--el-bg-color-page: var(--theme-color-background);
+	--el-bg-color-overlay: var(--theme-color-surface);
+	--el-fill-color-blank: var(--theme-color-surface);
+	--el-fill-color-light: var(--theme-color-background);
+	--el-fill-color-lighter: color-mix(in srgb, var(--theme-color-background) 60%, #fff);
+	--el-fill-color-extra-light: color-mix(in srgb, var(--theme-color-background) 35%, #fff);
+	--el-fill-color-dark: color-mix(in srgb, var(--theme-color-background) 85%, #000);
+
+	/* 边框与分割线 */
+	--el-border-color: var(--theme-color-border);
+	--el-border-color-light: var(--theme-color-divider);
+	--el-border-color-lighter: color-mix(in srgb, var(--theme-color-divider) 65%, #fff);
+	--el-border-color-extra-light: color-mix(in srgb, var(--theme-color-divider) 40%, #fff);
+	--el-border-color-dark: color-mix(in srgb, var(--theme-color-border) 85%, #000);
+	--el-border-color-darker: color-mix(in srgb, var(--theme-color-border) 70%, #000);
+
+	/* 圆角 */
+	--el-border-radius-base: var(--theme-radius-sm);
+	--el-border-radius-small: var(--theme-radius-sm);
+	--el-border-radius-round: 20px;
+
+	/* 遮罩 */
+	--el-mask-color: color-mix(in srgb, var(--theme-color-surface) 90%, transparent);
+	--el-mask-color-extra-light: color-mix(in srgb, var(--theme-color-surface) 30%, transparent);
+}
